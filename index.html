@@ -16,13 +16,8 @@
     <style>
       body {
         font-family: "Fredoka", "Inter", sans-serif;
-        background-color: #eae3d2; /* Warm cozy beige from reference image */
+        background-color: #cdc2ab; /* Warm cozy beige from reference image */
         color: #4a3e3d;
-      }
-      .wood-shadow {
-        box-shadow:
-          0 10px 0 0 #cdc2ab,
-          0 15px 20px rgba(0, 0, 0, 0.15);
       }
       .btn-shadow {
         box-shadow: 0 4px 0 0 #d1c5b0;
@@ -43,8 +38,9 @@
   <body
     class="min-h-screen flex flex-col justify-between overflow-x-hidden select-none pb-6"
   >
+    <!-- Header -->
     <header
-      class="w-full max-w-lg mx-auto px-4 pt-6 flex justify-between items-center z-10"
+      class="w-full max-w-6xl mx-auto px-4 pt-6 flex justify-between items-center z-10"
     >
       <div class="flex flex-col">
         <h1
@@ -89,7 +85,7 @@
             <path
               stroke-linecap="round"
               stroke-linejoin="round"
-              d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6L4.72 13.5H2.25v-3h2.47L9 15V9z"
+              d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l-2.25-2.25M19.5 12l2.25 2.25m-10.5-6L4.72 13.5H2.25v-3h2.47L9 15V9z"
             ></path>
           </svg>
         </button>
@@ -116,142 +112,168 @@
       </div>
     </header>
 
+    <!-- Main Workspace -->
     <main
-      class="flex-grow flex flex-col justify-center items-center px-4 py-4 w-full max-w-lg mx-auto"
+      class="flex-grow flex flex-col lg:flex-row items-center justify-center gap-6 w-full max-w-6xl mx-auto px-4 py-4"
     >
-      <!-- Timer, Level Title & Restart Panel -->
+      <!-- Left Panel: Stats, Info, & Chips (Compact Viewport Alignment) -->
       <div
-        class="w-full flex justify-between items-center mb-4 bg-[#faf6ee] p-3 rounded-2xl border border-[#d3c9b5] shadow-sm"
+        class="w-full lg:w-5/12 flex flex-col gap-4 self-stretch justify-center"
       >
-        <div class="flex flex-col">
-          <span
-            class="text-xs text-[#8c7e6c] font-semibold uppercase tracking-wider"
-            id="levelSubtitle"
-            >Level 1</span
-          >
-          <span class="text-lg font-bold text-[#5e5445]" id="levelName"
-            >Seaside Sunrise</span
-          >
-        </div>
-
-        <!-- Timer Display -->
+        <!-- Level Title Card -->
         <div
-          class="px-4 py-2 bg-[#eae3d2] rounded-xl font-bold text-xl text-[#5e5445] min-w-[90px] text-center border border-[#d3c9b5] shadow-inner flex items-center justify-center gap-1.5"
+          class="bg-[#faf6ee] p-4 rounded-2xl border border-[#d3c9b5] shadow-sm flex justify-between items-center"
         >
-          <span class="animate-pulse text-[#8c7e6c]">⏱️</span>
-          <span id="gameTimer">0:00</span>
-        </div>
-
-        <!-- Soft Action Buttons -->
-        <div class="flex gap-2">
-          <!-- Hint / Preview Button (Hold to see complete artwork) -->
-          <button
-            id="hintBtn"
-            class="p-2.5 bg-[#eae3d2] text-[#5e5445] rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5]"
-            title="Hold to Preview Solve"
-          >
-            👁️
-          </button>
-          <!-- Restart/Scramble -->
-          <button
-            onclick="restartLevel()"
-            class="p-2.5 bg-[#eae3d2] text-[#5e5445] rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5]"
-            title="Rescramble Puzzle"
-          >
-            🔄
-          </button>
-        </div>
-      </div>
-
-      <!-- The Main Interactive Canvas Container -->
-      <div
-        class="relative w-full aspect-square bg-[#d9cfb9] p-4 rounded-3xl wood-shadow border-4 border-[#3d3526] flex items-center justify-center"
-      >
-        <!-- Main Game Canvas -->
-        <canvas
-          id="gameCanvas"
-          width="600"
-          height="600"
-          class="w-full h-full rounded-2xl cursor-grab active:cursor-grabbing bg-[#cdc2ab]"
-        ></canvas>
-
-        <!-- Complete Solved Artwork Overlay Banner -->
-        <div
-          id="winBanner"
-          class="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-3xl flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-700 p-6"
-        >
-          <div
-            class="bg-[#faf6ee] rounded-3xl p-6 text-center max-w-sm w-full shadow-2xl border-4 border-[#3d3526] transform scale-95 transition-transform duration-700"
-            id="winCard"
-          >
-            <span class="text-5xl block mb-2">✨🎨✨</span>
-            <h3 class="text-2xl font-bold text-[#5e5445] mb-1">
-              Artwork Restored!
-            </h3>
-            <p class="text-sm text-[#8c7e6c] mb-4 font-semibold" id="winStats">
-              Completed in 14 moves!
-            </p>
-
-            <button
-              onclick="nextLevel()"
-              class="w-full py-3 bg-[#a8dadc] hover:bg-[#cbf3f0] text-[#1d3557] font-bold text-lg rounded-2xl btn-shadow transition-all border border-[#7ebdc2] flex items-center justify-center gap-2"
+          <div class="flex flex-col">
+            <span
+              class="text-xs text-[#8c7e6c] font-semibold uppercase tracking-wider"
+              id="levelSubtitle"
+              >Level 1</span
             >
-              Next Masterpiece ➔
+            <span class="text-xl font-bold text-[#5e5445]" id="levelName"
+              >Seaside Sunrise</span
+            >
+          </div>
+          <!-- Timer Display -->
+          <div
+            class="px-3.5 py-1.5 bg-[#eae3d2] rounded-xl font-bold text-lg text-[#5e5445] text-center border border-[#d3c9b5] shadow-inner flex items-center justify-center gap-1.5"
+          >
+            <span class="text-[#8c7e6c]">⏱️</span>
+            <span id="gameTimer">0:00</span>
+          </div>
+        </div>
+
+        <div
+          class="bg-[#faf6ee] p-3 rounded-2xl border border-[#d3c9b5] flex justify-between items-center gap-3"
+        >
+          <span class="text-sm font-semibold text-[#5e5445]">Tools:</span>
+          <div class="flex gap-2 w-full justify-end">
+            <!-- Hint / Preview Button -->
+            <button
+              id="hintBtn"
+              class="flex-1 max-w-[120px] py-2 bg-[#eae3d2] text-[#5e5445] font-bold text-sm rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5] flex items-center justify-center gap-1.5"
+              title="Hold to Preview Solve"
+            >
+              <span>👁️</span> Peek
+            </button>
+            <!-- Restart/Scramble -->
+            <button
+              onclick="restartLevel()"
+              class="flex-1 max-w-[120px] py-2 bg-[#eae3d2] text-[#5e5445] font-bold text-sm rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5] flex items-center justify-center gap-1.5"
+              title="Rescramble Puzzle"
+            >
+              <span>🔄</span> Scramble
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Interactive Stats and Controls Panel -->
-      <div class="w-full grid grid-cols-2 gap-3 mt-4">
+      <!-- Right Panel: Responsive Viewport Canvas Container -->
+      <div
+        class="w-full lg:w-7/12 flex items-center justify-center self-stretch"
+      >
         <div
-          class="bg-[#faf6ee] p-3 rounded-2xl border border-[#d3c9b5] text-center"
+          class="relative w-full aspect-square max-w-[480px] lg:max-w-[500px] p-4 rounded-3xl flex items-center justify-center"
         >
-          <span
-            class="text-xs text-[#8c7e6c] uppercase font-bold tracking-wider"
-            >Moves Made</span
+          <!-- Main Game Canvas -->
+          <canvas
+            id="gameCanvas"
+            width="600"
+            height="600"
+            class="w-full h-full rounded-2xl cursor-grab active:cursor-grabbing"
+          ></canvas>
+
+          <!-- Complete Solved Artwork Overlay Banner -->
+          <div
+            id="winBanner"
+            class="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-3xl flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-700 p-6 z-20"
           >
-          <p class="text-2xl font-bold text-[#5e5445]" id="moveCounter">0</p>
+            <div
+              class="bg-[#faf6ee] rounded-3xl p-6 text-center max-w-sm w-full shadow-2xl border-4 border-[#3d3526] transform scale-95 transition-transform duration-700"
+              id="winCard"
+            >
+              <span class="text-5xl block mb-2">✨🎨✨</span>
+              <h3 class="text-2xl font-bold text-[#5e5445] mb-1">
+                Artwork Restored!
+              </h3>
+              <p
+                class="text-sm text-[#8c7e6c] mb-4 font-semibold"
+                id="winStats"
+              >
+                Completed in 14 moves!
+              </p>
+
+              <button
+                onclick="nextLevel()"
+                class="w-full py-3 bg-[#a8dadc] hover:bg-[#cbf3f0] text-[#1d3557] font-bold text-lg rounded-2xl btn-shadow transition-all border border-[#7ebdc2] flex items-center justify-center gap-2"
+              >
+                Next Masterpiece ➔
+              </button>
+            </div>
+          </div>
         </div>
-        <div
-          class="bg-[#faf6ee] p-3 rounded-2xl border border-[#d3c9b5] text-center"
-        >
-          <span
-            class="text-xs text-[#8c7e6c] uppercase font-bold tracking-wider"
-            >Restored %</span
+      </div>
+
+      <div
+        class="w-full lg:w-5/12 flex flex-col gap-4 self-stretch justify-center"
+      >
+        <!-- Stats & Quick Action Button Controls Panel -->
+        <div class="grid grid-cols-2 gap-3">
+          <div
+            class="bg-[#faf6ee] p-3 rounded-2xl border border-[#d3c9b5] text-center flex flex-col justify-center"
           >
-          <p class="text-2xl font-bold text-[#5e5445]" id="progressPercentage">
-            0%
-          </p>
+            <span
+              class="text-[11px] text-[#8c7e6c] uppercase font-bold tracking-wider"
+              >Moves Made</span
+            >
+            <p class="text-2xl font-bold text-[#5e5445]" id="moveCounter">0</p>
+          </div>
+          <div
+            class="bg-[#faf6ee] p-3 rounded-2xl border border-[#d3c9b5] text-center flex flex-col justify-center"
+          >
+            <span
+              class="text-[11px] text-[#8c7e6c] uppercase font-bold tracking-wider"
+              >Restored %</span
+            >
+            <p
+              class="text-2xl font-bold text-[#5e5445]"
+              id="progressPercentage"
+            >
+              0%
+            </p>
+          </div>
+        </div>
+
+        <!-- Masterpiece Selector Grid Chips (Direct Access) -->
+        <div
+          class="bg-[#faf6ee]/70 p-4 rounded-2xl border border-[#d3c9b5] flex flex-col gap-2.5"
+        >
+          <div class="flex justify-between items-center">
+            <span
+              class="text-xs text-[#8c7e6c] font-bold uppercase tracking-wider"
+              >Select Masterpiece</span
+            >
+            <button
+              onclick="openCustomCreator()"
+              class="text-xs bg-[#a8f5d0] hover:bg-[#cbfedc] text-[#1e543b] px-3 py-1 rounded-full font-bold transition-all border border-[#75d6a8] shadow-sm"
+            >
+              ＋ Custom Art
+            </button>
+          </div>
+          <div
+            class="flex flex-wrap gap-1.5 max-h-[140px] overflow-y-auto pr-1 pb-2"
+            id="levelChips"
+          >
+            <!-- Programmatically filled -->
+          </div>
         </div>
       </div>
     </main>
 
-    <footer class="w-full max-w-lg mx-auto px-4 mt-2 flex flex-col gap-3">
-      <!-- Level Selector Chips -->
+    <!-- Footer -->
+    <footer class="w-full max-w-6xl mx-auto px-4 mt-2">
       <div
-        class="bg-[#faf6ee]/70 p-3 rounded-2xl border border-[#d3c9b5] flex flex-col gap-2"
-      >
-        <div class="flex justify-between items-center px-1">
-          <span
-            class="text-xs text-[#8c7e6c] font-bold uppercase tracking-wider"
-            >Select Masterpiece</span
-          >
-          <button
-            onclick="openCustomCreator()"
-            class="text-xs bg-[#a8f5d0] hover:bg-[#cbfedc] text-[#1e543b] px-3 py-1 rounded-full font-bold transition-all border border-[#75d6a8] shadow-sm"
-          >
-            ＋ Custom Art
-          </button>
-        </div>
-        <div class="flex flex-wrap gap-1" id="levelChips">
-          <!-- Programmatically filled -->
-        </div>
-      </div>
-
-      <!-- Reference Credit inspired by image -->
-      <div
-        class="text-center mt-2 text-[11px] text-[#8c7e6c]/80 flex flex-col gap-0.5 font-medium"
+        class="text-center text-[11px] text-[#8c7e6c]/80 flex flex-col gap-0.5 font-medium"
       >
         <p>Inspired by sliding geometric art mechanics.</p>
         <p class="italic text-[10px]">
@@ -458,6 +480,9 @@
       sceneCanvas.width = CANVAS_SIZE;
       sceneCanvas.height = CANVAS_SIZE;
 
+      // Visual Layout Margin Padding to completely prevent border cropping along canvas boundaries
+      const GRID_PADDING = 12;
+
       // Game state variables
       let currentLevelIndex = 0;
       let GRID_COLS = 6;
@@ -480,6 +505,8 @@
       let isSolved = false;
       let isCompletingAnimation = false;
       let completionProgress = 0; // 0 to 1 during the merge fade transition
+      let solvedOffsetX = 0; // translation offset on win
+      let solvedOffsetY = 0; // translation offset on win
       let showHint = false;
       let soundEnabled = false;
 
@@ -1331,8 +1358,9 @@
 
         return loops.map((loop) => {
           return loop.map((pt) => ({
-            x: (offsetCol + pt.x) * scaleX,
-            y: (offsetRow + pt.y) * scaleY,
+            // Position aligned with GRID_PADDING offsets to prevent border cropping
+            x: GRID_PADDING + (offsetCol + pt.x) * scaleX,
+            y: GRID_PADDING + (offsetRow + pt.y) * scaleY,
           }));
         });
       }
@@ -1366,12 +1394,13 @@
         ctx.globalAlpha = backdropAlpha;
         for (let c = 0; c < GRID_COLS; c++) {
           for (let r = 0; r < GRID_ROWS; r++) {
-            ctx.fillStyle = "#cdc2ab";
-            let pad = 4;
+            ctx.fillStyle = "#b8ae9a";
+            let pad = 10;
+            // Adjusted coordinates with GRID_PADDING offset
             drawRoundedRect(
               ctx,
-              c * CELL_SIZE + pad,
-              r * CELL_SIZE + pad,
+              GRID_PADDING + c * CELL_SIZE + pad,
+              GRID_PADDING + r * CELL_SIZE + pad,
               CELL_SIZE - pad * 2,
               CELL_SIZE - pad * 2,
               14,
@@ -1386,11 +1415,17 @@
         }
         ctx.restore();
 
-        // 2. Render hint/preview underlay if activated
+        // 2. Render hint/preview underlay if activated (scaled & padded correctly)
         if (showHint) {
           ctx.save();
           ctx.globalAlpha = 0.35;
-          ctx.drawImage(sceneCanvas, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+          ctx.drawImage(
+            sceneCanvas,
+            GRID_PADDING,
+            GRID_PADDING,
+            GRID_COLS * CELL_SIZE,
+            GRID_ROWS * CELL_SIZE,
+          );
           ctx.restore();
         }
 
@@ -1420,10 +1455,16 @@
           createPiecePath(ctx, visualLoops, radius);
           ctx.clip();
 
-          // Draw the clipped scene texture perfectly aligned to movement
-          const offsetX = (p.currentX - p.targetX) * CELL_SIZE;
-          const offsetY = (p.currentY - p.targetY) * CELL_SIZE;
-          ctx.drawImage(sceneCanvas, offsetX, offsetY);
+          // Draw the clipped scene texture perfectly aligned with its relative offsets
+          const offsetX = GRID_PADDING + (p.currentX - p.targetX) * CELL_SIZE;
+          const offsetY = GRID_PADDING + (p.currentY - p.targetY) * CELL_SIZE;
+          ctx.drawImage(
+            sceneCanvas,
+            offsetX,
+            offsetY,
+            GRID_COLS * CELL_SIZE,
+            GRID_ROWS * CELL_SIZE,
+          );
 
           ctx.restore();
 
@@ -1447,13 +1488,13 @@
             ctx.stroke();
           } else {
             // Standard dark outer border
-            ctx.strokeStyle = "#3d3526";
+            ctx.strokeStyle = "#5e5445";
             ctx.lineWidth = 4;
             ctx.stroke();
 
             // Delicate 3D highlight on top-left outer borders
             ctx.save();
-            ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+            ctx.strokeStyle = "#5e5445";
             ctx.lineWidth = 2;
             ctx.translate(-1.5, -1.5);
             ctx.stroke();
@@ -1462,11 +1503,35 @@
           ctx.restore();
         });
 
-        // 4. Overlap complete, pristine seamless image to erase any subpixel gaps as tiles merge
+        // 4. Overlap complete, pristine seamless active image (ONLY inside the active level image boundaries, matching position/width/height perfectly)
         if (isSolved && completionProgress > 0) {
           ctx.save();
           ctx.globalAlpha = completionProgress;
-          ctx.drawImage(sceneCanvas, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+          // Determine the correct dimensions of the active artwork slice
+          const lvl = levels[currentLevelIndex];
+          const srcX = lvl.artOffsetCol * CELL_SIZE;
+          const srcY = lvl.artOffsetRow * CELL_SIZE;
+          const srcW = lvl.artWidth * CELL_SIZE;
+          const srcH = lvl.artHeight * CELL_SIZE;
+
+          // Aligns exactly to the current shifted position of the completed puzzle block group
+          const destX =
+            GRID_PADDING + (lvl.artOffsetCol + solvedOffsetX) * CELL_SIZE;
+          const destY =
+            GRID_PADDING + (lvl.artOffsetRow + solvedOffsetY) * CELL_SIZE;
+
+          ctx.drawImage(
+            sceneCanvas,
+            srcX,
+            srcY,
+            srcW,
+            srcH,
+            destX,
+            destY,
+            srcW,
+            srcH,
+          );
           ctx.restore();
         }
 
@@ -1476,10 +1541,15 @@
 
       // Particle dynamics for successful complete solve bursts
       function createSolveChimeConfetti() {
+        // Burst sparks aligned to the translation coordinates of the solved center
+        const finalCenterX =
+          GRID_PADDING + (GRID_COLS / 2 + solvedOffsetX) * CELL_SIZE;
+        const finalCenterY =
+          GRID_PADDING + (GRID_ROWS / 2 + solvedOffsetY) * CELL_SIZE;
         for (let i = 0; i < 90; i++) {
           particles.push({
-            x: CANVAS_SIZE / 2,
-            y: CANVAS_SIZE / 2,
+            x: finalCenterX,
+            y: finalCenterY,
             vx: (Math.random() - 0.5) * 14,
             vy: (Math.random() - 0.5) * 14 - 4,
             color: `hsl(${Math.random() * 360}, 100%, 75%)`,
@@ -1580,8 +1650,10 @@
       function onStart(e) {
         if (isSolved) return;
         const { x, y } = getPreciseCoordsFromEvent(e);
-        const col = Math.floor(x / CELL_SIZE);
-        const row = Math.floor(y / CELL_SIZE);
+
+        // Adjusted matching for GRID_PADDING boundaries
+        const col = Math.floor((x - GRID_PADDING) / CELL_SIZE);
+        const row = Math.floor((y - GRID_PADDING) / CELL_SIZE);
 
         // Find clicked piece
         let clickedPiece = pieces.find((p) => {
@@ -1594,8 +1666,8 @@
           activePiece = clickedPiece;
           dragStartGridX = clickedPiece.x;
           dragStartGridY = clickedPiece.y;
-          dragOffsetX = x / CELL_SIZE - clickedPiece.x;
-          dragOffsetY = y / CELL_SIZE - clickedPiece.y;
+          dragOffsetX = (x - GRID_PADDING) / CELL_SIZE - clickedPiece.x;
+          dragOffsetY = (y - GRID_PADDING) / CELL_SIZE - clickedPiece.y;
           isDragging = true;
 
           // Setup initial drag target points
@@ -1612,9 +1684,9 @@
 
         const { x, y } = getPreciseCoordsFromEvent(e);
 
-        // Set smooth sliding visual targets for current active piece tracking
-        activePiece.dragTargetX = x / CELL_SIZE - dragOffsetX;
-        activePiece.dragTargetY = y / CELL_SIZE - dragOffsetY;
+        // Set smooth sliding visual targets for current active piece tracking relative to padded boundaries
+        activePiece.dragTargetX = (x - GRID_PADDING) / CELL_SIZE - dragOffsetX;
+        activePiece.dragTargetY = (y - GRID_PADDING) / CELL_SIZE - dragOffsetY;
 
         e.preventDefault();
       }
@@ -1661,24 +1733,46 @@
       canvas.addEventListener("touchmove", onMove, { passive: false });
       window.addEventListener("touchend", onEnd);
 
+      // Win check refactored to allow translation-independent completions anywhere on the grid
       function checkPuzzleWinCondition() {
-        let correctPieces = 0;
+        if (pieces.length === 0) return;
+
+        // Analyze current translation offsets of all pieces relative to their target locations
+        const baseDx = pieces[0].x - pieces[0].targetX;
+        const baseDy = pieces[0].y - pieces[0].targetY;
+
+        // Count pieces that share the same translation offset
+        const offsetCounts = {};
+        let maxClusterSize = 0;
+        let bestOffsetKey = `${baseDx},${baseDy}`;
+
         pieces.forEach((p) => {
-          if (p.x === p.targetX && p.y === p.targetY) {
-            correctPieces++;
+          const dx = p.x - p.targetX;
+          const dy = p.y - p.targetY;
+          const key = `${dx},${dy}`;
+          offsetCounts[key] = (offsetCounts[key] || 0) + 1;
+          if (offsetCounts[key] > maxClusterSize) {
+            maxClusterSize = offsetCounts[key];
+            bestOffsetKey = key;
           }
         });
 
-        // Update Restored % UI
-        const percentage = Math.round((correctPieces / pieces.length) * 100);
+        // Update Restored % UI using the largest cohesive correct block cluster
+        const percentage = Math.round((maxClusterSize / pieces.length) * 100);
         document.getElementById("progressPercentage").innerText =
           percentage + "%";
 
-        if (correctPieces === pieces.length) {
-          // Winning state triggered!
+        // Win condition met: all pieces share the exact same translation coordinate offsets
+        if (maxClusterSize === pieces.length) {
+          const [finalDx, finalDy] = bestOffsetKey.split(",").map(Number);
+
           isSolved = true;
           isCompletingAnimation = true;
           completionProgress = 0;
+
+          // Store the offsets so visual merge effects render exactly at the translated solved coordinates
+          solvedOffsetX = finalDx;
+          solvedOffsetY = finalDy;
 
           clearInterval(timerInterval);
           playWinSound();
@@ -1716,6 +1810,8 @@
         isSolved = false;
         isCompletingAnimation = false;
         completionProgress = 0;
+        solvedOffsetX = 0;
+        solvedOffsetY = 0;
 
         scramblePuzzle();
         startTimer();
@@ -1728,7 +1824,8 @@
 
         GRID_COLS = lvl.gridCols;
         GRID_ROWS = lvl.gridRows;
-        CELL_SIZE = CANVAS_SIZE / GRID_COLS;
+        // Cell sizing accounts for GRID_PADDING margins to prevent border clipping
+        CELL_SIZE = (CANVAS_SIZE - GRID_PADDING * 2) / GRID_COLS;
 
         sctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
