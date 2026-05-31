@@ -1,0 +1,1993 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pictomix - Relaxing Mosaic Slider</title>
+    <!-- Tailwind CSS for modern responsive layout -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter and Fredoka for a friendly, cozy feel -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <!-- Tone.js for premium synthesized sounds -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+      body {
+        font-family: "Fredoka", "Inter", sans-serif;
+        background-color: #eae3d2; /* Warm cozy beige from reference image */
+        color: #4a3e3d;
+      }
+      .wood-shadow {
+        box-shadow:
+          0 10px 0 0 #cdc2ab,
+          0 15px 20px rgba(0, 0, 0, 0.15);
+      }
+      .btn-shadow {
+        box-shadow: 0 4px 0 0 #d1c5b0;
+      }
+      .btn-shadow:active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0 0 #d1c5b0;
+      }
+      .custom-btn-shadow {
+        box-shadow: 0 4px 0 0 #7fa699;
+      }
+      .custom-btn-shadow:active {
+        transform: translateY(4px);
+        box-shadow: 0 0px 0 0 #7fa699;
+      }
+    </style>
+  </head>
+  <body
+    class="min-h-screen flex flex-col justify-between overflow-x-hidden select-none pb-6"
+  >
+    <header
+      class="w-full max-w-lg mx-auto px-4 pt-6 flex justify-between items-center z-10"
+    >
+      <div class="flex flex-col">
+        <h1
+          class="text-3xl font-bold tracking-tight text-[#5e5445] flex items-center gap-2"
+        >
+          <span>🧩</span> Pictomix
+        </h1>
+        <p class="text-xs text-[#8c7e6c] font-medium tracking-wide">
+          RELAXING MOSAIC PUZZLE
+        </p>
+      </div>
+      <div class="flex items-center gap-2">
+        <!-- Sound Toggle Button -->
+        <button
+          id="soundBtn"
+          onclick="toggleSound()"
+          class="p-3 bg-[#faf6ee] text-[#5e5445] rounded-full btn-shadow transition-all duration-100 hover:bg-white border border-[#d3c9b5]"
+          title="Toggle Zen Sound"
+        >
+          <svg
+            id="soundOnIcon"
+            class="w-5 h-5 hidden"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z"
+            ></path>
+          </svg>
+          <svg
+            id="soundOffIcon"
+            class="w-5 h-5 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6L4.72 13.5H2.25v-3h2.47L9 15V9z"
+            ></path>
+          </svg>
+        </button>
+        <!-- Help/How-to Button -->
+        <button
+          onclick="toggleHowTo(true)"
+          class="p-3 bg-[#faf6ee] text-[#5e5445] rounded-full btn-shadow transition-all duration-100 hover:bg-white border border-[#d3c9b5]"
+          title="How to Play"
+        >
+          <svg
+            class="w-5 h-5"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"
+            ></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <main
+      class="flex-grow flex flex-col justify-center items-center px-4 py-4 w-full max-w-lg mx-auto"
+    >
+      <!-- Timer, Level Title & Restart Panel -->
+      <div
+        class="w-full flex justify-between items-center mb-4 bg-[#faf6ee] p-3 rounded-2xl border border-[#d3c9b5] shadow-sm"
+      >
+        <div class="flex flex-col">
+          <span
+            class="text-xs text-[#8c7e6c] font-semibold uppercase tracking-wider"
+            id="levelSubtitle"
+            >Level 1</span
+          >
+          <span class="text-lg font-bold text-[#5e5445]" id="levelName"
+            >Seaside Sunrise</span
+          >
+        </div>
+
+        <!-- Timer Display -->
+        <div
+          class="px-4 py-2 bg-[#eae3d2] rounded-xl font-bold text-xl text-[#5e5445] min-w-[90px] text-center border border-[#d3c9b5] shadow-inner flex items-center justify-center gap-1.5"
+        >
+          <span class="animate-pulse text-[#8c7e6c]">⏱️</span>
+          <span id="gameTimer">0:00</span>
+        </div>
+
+        <!-- Soft Action Buttons -->
+        <div class="flex gap-2">
+          <!-- Hint / Preview Button (Hold to see complete artwork) -->
+          <button
+            id="hintBtn"
+            class="p-2.5 bg-[#eae3d2] text-[#5e5445] rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5]"
+            title="Hold to Preview Solve"
+          >
+            👁️
+          </button>
+          <!-- Restart/Scramble -->
+          <button
+            onclick="restartLevel()"
+            class="p-2.5 bg-[#eae3d2] text-[#5e5445] rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5]"
+            title="Rescramble Puzzle"
+          >
+            🔄
+          </button>
+        </div>
+      </div>
+
+      <!-- The Main Interactive Canvas Container -->
+      <div
+        class="relative w-full aspect-square bg-[#d9cfb9] p-4 rounded-3xl wood-shadow border-4 border-[#3d3526] flex items-center justify-center"
+      >
+        <!-- Main Game Canvas -->
+        <canvas
+          id="gameCanvas"
+          width="600"
+          height="600"
+          class="w-full h-full rounded-2xl cursor-grab active:cursor-grabbing bg-[#cdc2ab]"
+        ></canvas>
+
+        <!-- Complete Solved Artwork Overlay Banner -->
+        <div
+          id="winBanner"
+          class="absolute inset-0 bg-black/40 backdrop-blur-sm rounded-3xl flex flex-col items-center justify-center opacity-0 pointer-events-none transition-all duration-700 p-6"
+        >
+          <div
+            class="bg-[#faf6ee] rounded-3xl p-6 text-center max-w-sm w-full shadow-2xl border-4 border-[#3d3526] transform scale-95 transition-transform duration-700"
+            id="winCard"
+          >
+            <span class="text-5xl block mb-2">✨🎨✨</span>
+            <h3 class="text-2xl font-bold text-[#5e5445] mb-1">
+              Artwork Restored!
+            </h3>
+            <p class="text-sm text-[#8c7e6c] mb-4 font-semibold" id="winStats">
+              Completed in 14 moves!
+            </p>
+
+            <button
+              onclick="nextLevel()"
+              class="w-full py-3 bg-[#a8dadc] hover:bg-[#cbf3f0] text-[#1d3557] font-bold text-lg rounded-2xl btn-shadow transition-all border border-[#7ebdc2] flex items-center justify-center gap-2"
+            >
+              Next Masterpiece ➔
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Stats and Controls Panel -->
+      <div class="w-full grid grid-cols-2 gap-3 mt-4">
+        <div
+          class="bg-[#faf6ee] p-3 rounded-2xl border border-[#d3c9b5] text-center"
+        >
+          <span
+            class="text-xs text-[#8c7e6c] uppercase font-bold tracking-wider"
+            >Moves Made</span
+          >
+          <p class="text-2xl font-bold text-[#5e5445]" id="moveCounter">0</p>
+        </div>
+        <div
+          class="bg-[#faf6ee] p-3 rounded-2xl border border-[#d3c9b5] text-center"
+        >
+          <span
+            class="text-xs text-[#8c7e6c] uppercase font-bold tracking-wider"
+            >Restored %</span
+          >
+          <p class="text-2xl font-bold text-[#5e5445]" id="progressPercentage">
+            0%
+          </p>
+        </div>
+      </div>
+    </main>
+
+    <footer class="w-full max-w-lg mx-auto px-4 mt-2 flex flex-col gap-3">
+      <!-- Level Selector Chips -->
+      <div
+        class="bg-[#faf6ee]/70 p-3 rounded-2xl border border-[#d3c9b5] flex flex-col gap-2"
+      >
+        <div class="flex justify-between items-center px-1">
+          <span
+            class="text-xs text-[#8c7e6c] font-bold uppercase tracking-wider"
+            >Select Masterpiece</span
+          >
+          <button
+            onclick="openCustomCreator()"
+            class="text-xs bg-[#a8f5d0] hover:bg-[#cbfedc] text-[#1e543b] px-3 py-1 rounded-full font-bold transition-all border border-[#75d6a8] shadow-sm"
+          >
+            ＋ Custom Art
+          </button>
+        </div>
+        <div class="flex flex-wrap gap-1" id="levelChips">
+          <!-- Programmatically filled -->
+        </div>
+      </div>
+
+      <!-- Reference Credit inspired by image -->
+      <div
+        class="text-center mt-2 text-[11px] text-[#8c7e6c]/80 flex flex-col gap-0.5 font-medium"
+      >
+        <p>Inspired by sliding geometric art mechanics.</p>
+        <p class="italic text-[10px]">
+          Reference: "#puzzle Can you make it right_ 🧩.webp"
+        </p>
+      </div>
+    </footer>
+
+    <!-- HOW TO PLAY MODAL -->
+    <div
+      id="howToModal"
+      class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300"
+    >
+      <div
+        class="bg-[#faf6ee] rounded-3xl max-w-md w-full p-6 shadow-2xl border-4 border-[#3d3526] transform scale-95 transition-all"
+      >
+        <div class="flex justify-between items-start mb-4">
+          <h3 class="text-2xl font-bold text-[#5e5445]">
+            How to Play Pictomix
+          </h3>
+          <button
+            onclick="toggleHowTo(false)"
+            class="text-gray-400 hover:text-gray-600 font-bold text-xl"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="space-y-3 text-sm text-[#5e5445] leading-relaxed">
+          <div class="flex gap-3 items-start bg-[#eae3d2]/40 p-3 rounded-xl">
+            <span class="text-xl">🎴</span>
+            <p>
+              <strong>Goal:</strong> Drag and slide the puzzle block pieces
+              around the grid to fit them into the perfect mosaic picture
+              layout.
+            </p>
+          </div>
+          <div class="flex gap-3 items-start bg-[#eae3d2]/40 p-3 rounded-xl">
+            <span class="text-xl">👉</span>
+            <p>
+              <strong>Drag & Drop:</strong> Click and drag anywhere to pick up a
+              tile group. Drop it on any valid empty space. Incorrect drops
+              glide smoothly back to their original spots!
+            </p>
+          </div>
+          <div class="flex gap-3 items-start bg-[#eae3d2]/40 p-3 rounded-xl">
+            <span class="text-xl">👁️</span>
+            <p>
+              <strong>Hint:</strong> Press and hold the eye icon at any point to
+              peek at the target layout of the finished masterpiece.
+            </p>
+          </div>
+          <div class="flex gap-3 items-start bg-[#eae3d2]/40 p-3 rounded-xl">
+            <span class="text-xl">🎨</span>
+            <p>
+              <strong>Custom Levels:</strong> Click the
+              <strong>＋ Custom Art</strong> button in the footer to upload your
+              own photos and set custom difficulty levels!
+            </p>
+          </div>
+        </div>
+        <button
+          onclick="toggleHowTo(false)"
+          class="mt-6 w-full py-3 bg-[#d9cfb9] hover:bg-[#cdc2ab] text-[#5e5445] font-bold rounded-2xl transition-all border border-[#bfae95] btn-shadow"
+        >
+          Start Restoring Art
+        </button>
+      </div>
+    </div>
+
+    <!-- CUSTOM ARTWORK GENERATOR MODAL -->
+    <div
+      id="creatorModal"
+      class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300"
+    >
+      <div
+        class="bg-[#faf6ee] rounded-3xl max-w-md w-full p-6 shadow-2xl border-4 border-[#3d3526] transform scale-95 transition-all"
+      >
+        <div class="flex justify-between items-start mb-4">
+          <h3 class="text-2xl font-bold text-[#5e5445] flex items-center gap-2">
+            <span>✨📸</span> Create Custom Art
+          </h3>
+          <button
+            onclick="closeCustomCreator()"
+            class="text-gray-400 hover:text-gray-600 font-bold text-2xl leading-none"
+          >
+            &times;
+          </button>
+        </div>
+
+        <div class="space-y-4 text-sm text-[#5e5445]">
+          <!-- File Selection Dropzone -->
+          <div
+            id="dropzone"
+            class="border-3 border-dashed border-[#bfae95] hover:border-[#8c7e6c] bg-[#eae3d2]/40 rounded-2xl p-6 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-2 relative overflow-hidden min-h-[140px]"
+          >
+            <input
+              type="file"
+              id="imageInput"
+              accept="image/*"
+              class="absolute inset-0 opacity-0 cursor-pointer"
+              onchange="handleImageSelection(event)"
+            />
+            <div
+              id="dropzonePlaceholder"
+              class="flex flex-col items-center gap-1.5"
+            >
+              <span class="text-3xl">📤</span>
+              <p class="font-semibold text-[#5e5445]">
+                Click to upload or drag image
+              </p>
+              <p class="text-xs text-[#8c7e6c]">JPEG, PNG, WEBP supported</p>
+            </div>
+            <img
+              id="imagePreview"
+              class="hidden max-h-[120px] rounded-lg shadow border border-[#cdc2ab]"
+            />
+          </div>
+
+          <!-- Custom Name -->
+          <div class="flex flex-col gap-1">
+            <label
+              class="font-semibold text-xs text-[#8c7e6c] uppercase tracking-wider"
+              >Artwork Title</label
+            >
+            <input
+              type="text"
+              id="customTitleInput"
+              placeholder="My Masterpiece"
+              class="px-4 py-2.5 rounded-xl border border-[#d3c9b5] bg-[#faf6ee] focus:outline-none focus:ring-2 focus:ring-[#8c7e6c] text-[#5e5445] font-semibold text-sm"
+            />
+          </div>
+
+          <!-- Difficulty selection against uploaded image (Grid division scaling) -->
+          <div class="flex flex-col gap-1.5">
+            <label
+              class="font-semibold text-xs text-[#8c7e6c] uppercase tracking-wider"
+              >Difficulty & Grid Division</label
+            >
+            <div class="grid grid-cols-4 gap-2">
+              <button
+                onclick="setCreatorDifficulty('easy')"
+                id="diff-easy"
+                class="diff-btn py-2 text-xs font-bold rounded-xl border border-[#d3c9b5] bg-[#faf6ee] hover:bg-white transition-all text-[#5e5445]"
+              >
+                Easy
+                <span class="block text-[9px] font-medium text-[#8c7e6c] mt-0.5"
+                  >3x3 (9 Tiles)</span
+                >
+              </button>
+              <button
+                onclick="setCreatorDifficulty('medium')"
+                id="diff-medium"
+                class="diff-btn py-2 text-xs font-bold rounded-xl border border-[#d3c9b5] bg-[#faf6ee] hover:bg-white transition-all text-[#5e5445]"
+              >
+                Medium
+                <span class="block text-[9px] font-medium text-[#8c7e6c] mt-0.5"
+                  >5x5 (25 Tiles)</span
+                >
+              </button>
+              <button
+                onclick="setCreatorDifficulty('hard')"
+                id="diff-hard"
+                class="diff-btn py-2 text-xs font-bold rounded-xl border border-[#d3c9b5] bg-[#faf6ee] hover:bg-white transition-all text-[#5e5445]"
+              >
+                Hard
+                <span class="block text-[9px] font-medium text-[#8c7e6c] mt-0.5"
+                  >7x7 (49 Tiles)</span
+                >
+              </button>
+              <button
+                onclick="setCreatorDifficulty('expert')"
+                id="diff-expert"
+                class="diff-btn py-2 text-xs font-bold rounded-xl border border-[#d3c9b5] bg-[#faf6ee] hover:bg-white transition-all text-[#5e5445]"
+              >
+                Expert
+                <span class="block text-[9px] font-medium text-[#8c7e6c] mt-0.5"
+                  >9x9 (81 Tiles)</span
+                >
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Generate Level Action -->
+        <button
+          id="createLevelBtn"
+          onclick="submitCustomLevel()"
+          class="mt-6 w-full py-3 bg-[#a8f5d0] hover:bg-[#cbfedc] text-[#1e543b] font-bold rounded-2xl transition-all border border-[#75d6a8] custom-btn-shadow disabled:opacity-50 disabled:pointer-events-none"
+          disabled
+        >
+          Create and Play! 🎮
+        </button>
+      </div>
+    </div>
+
+    <script>
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+      const sceneCanvas = document.createElement("canvas"); // Offscreen canvas for master scenes
+      const sctx = sceneCanvas.getContext("2d");
+
+      // Fixed virtual coordinate space of canvas (we let CSS scale it dynamically)
+      const CANVAS_SIZE = 600;
+      sceneCanvas.width = CANVAS_SIZE;
+      sceneCanvas.height = CANVAS_SIZE;
+
+      // Game state variables
+      let currentLevelIndex = 0;
+      let GRID_COLS = 6;
+      let GRID_ROWS = 6;
+      let CELL_SIZE = 100;
+
+      let pieces = [];
+      let moveCount = 0;
+      let timeElapsed = 0;
+      let timerInterval = null;
+      let activePiece = null;
+
+      // Drag state tracking variables
+      let dragStartGridX = 0;
+      let dragStartGridY = 0;
+      let dragOffsetX = 0;
+      let dragOffsetY = 0;
+
+      let isDragging = false;
+      let isSolved = false;
+      let isCompletingAnimation = false;
+      let completionProgress = 0; // 0 to 1 during the merge fade transition
+      let showHint = false;
+      let soundEnabled = false;
+
+      // Custom level upload state
+      let uploadedImgDataUrl = null;
+      let creatorDifficulty = "medium"; // default to medium
+
+      // Custom particles system for fireworks/confetti
+      let particles = [];
+
+      // Definition of Level Art scenes and their positions
+      const levels = [
+        {
+          name: "Seaside Sunrise",
+          subtitle: "Level 1 - Morning Warmth",
+          gridCols: 6,
+          gridRows: 6,
+          artWidth: 4, // 4x4 picture in center
+          artHeight: 4,
+          artOffsetCol: 1, // center offset in grid
+          artOffsetRow: 1,
+          renderFn: drawScene1,
+          isCustom: false,
+        },
+        {
+          name: "Cozy Cabin",
+          subtitle: "Level 2 - Forest Solitude",
+          gridCols: 7,
+          gridRows: 7,
+          artWidth: 5,
+          artHeight: 5,
+          artOffsetCol: 1,
+          artOffsetRow: 1,
+          renderFn: drawScene2,
+          isCustom: false,
+        },
+        {
+          name: "Cosmic Odyssey",
+          subtitle: "Level 3 - Nebula Voyage",
+          gridCols: 8,
+          gridRows: 8,
+          artWidth: 6,
+          artHeight: 6,
+          artOffsetCol: 1,
+          artOffsetRow: 1,
+          renderFn: drawScene3,
+          isCustom: false,
+        },
+        {
+          name: "Island Lighthouse",
+          subtitle: "Level 4 - Beacon of Hope",
+          gridCols: 8,
+          gridRows: 8,
+          artWidth: 6,
+          artHeight: 6,
+          artOffsetCol: 1,
+          artOffsetRow: 1,
+          renderFn: drawScene4,
+          isCustom: false,
+        },
+        {
+          name: "Emerald Dragon",
+          subtitle: "Level 5 - Mystic Mountains",
+          gridCols: 9,
+          gridRows: 9,
+          artWidth: 7,
+          artHeight: 7,
+          artOffsetCol: 1,
+          artOffsetRow: 1,
+          renderFn: drawScene5,
+          isCustom: false,
+        },
+      ];
+
+      let ambientSynth, slideSynth, chimeSynth;
+
+      function initAudio() {
+        if (ambientSynth) return;
+
+        // Soft tactile slide click synth
+        slideSynth = new Tone.Synth({
+          oscillator: { type: "sine" },
+          envelope: { attack: 0.005, decay: 0.1, sustain: 0, release: 0.05 },
+        }).toDestination();
+        slideSynth.volume.value = -8;
+
+        // Clear melodic snap and win chime
+        chimeSynth = new Tone.PolySynth(Tone.Synth, {
+          oscillator: { type: "triangle" },
+          envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.5 },
+        }).toDestination();
+        chimeSynth.volume.value = -10;
+
+        // Soft warm ambient synthesizer pads
+        ambientSynth = new Tone.PolySynth(Tone.Synth, {
+          oscillator: { type: "sine" },
+          envelope: { attack: 1.5, decay: 1.0, sustain: 0.8, release: 1.5 },
+        }).toDestination();
+        ambientSynth.volume.value = -24;
+      }
+
+      function playSlideSound() {
+        if (!soundEnabled) return;
+        initAudio();
+        slideSynth.triggerAttackRelease("G3", "16n");
+      }
+
+      function playSnapSound() {
+        if (!soundEnabled) return;
+        initAudio();
+        chimeSynth.triggerAttackRelease(["E5", "A5"], "8n");
+      }
+
+      function playWinSound() {
+        if (!soundEnabled) return;
+        initAudio();
+        const now = Tone.now();
+        chimeSynth.triggerAttackRelease("C5", "8n", now);
+        chimeSynth.triggerAttackRelease("E5", "8n", now + 0.12);
+        chimeSynth.triggerAttackRelease("G5", "8n", now + 0.24);
+        chimeSynth.triggerAttackRelease("C6", "4n", now + 0.36);
+      }
+
+      let ambientInterval;
+      function toggleAmbientMusic() {
+        if (!soundEnabled) {
+          clearInterval(ambientInterval);
+          return;
+        }
+        initAudio();
+        Tone.start();
+
+        // Quiet, soothing 4-chord progressive pattern playing infinitely
+        const progressions = [
+          ["C4", "E4", "G4", "B4"],
+          ["F3", "A3", "C4", "E4"],
+          ["A3", "C4", "E4", "G4"],
+          ["G3", "B3", "D4", "G4"],
+        ];
+        let currentChord = 0;
+
+        clearInterval(ambientInterval);
+        ambientInterval = setInterval(() => {
+          if (!soundEnabled) return;
+          ambientSynth.triggerAttackRelease(progressions[currentChord], 4);
+          currentChord = (currentChord + 1) % progressions.length;
+        }, 5000);
+      }
+
+      function toggleSound() {
+        soundEnabled = !soundEnabled;
+        const soundOnIcon = document.getElementById("soundOnIcon");
+        const soundOffIcon = document.getElementById("soundOffIcon");
+        const soundBtn = document.getElementById("soundBtn");
+
+        if (soundEnabled) {
+          soundOnIcon.classList.remove("hidden");
+          soundOffIcon.classList.add("hidden");
+          soundBtn.classList.add("bg-[#d8f3dc]", "border-[#74c69d]");
+          toggleAmbientMusic();
+        } else {
+          soundOnIcon.classList.add("hidden");
+          soundOffIcon.classList.remove("hidden");
+          soundBtn.classList.remove("bg-[#d8f3dc]", "border-[#74c69d]");
+          toggleAmbientMusic();
+        }
+      }
+
+      // Helper to draw a rounded rect
+      function drawRoundedRect(ctx, x, y, width, height, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x + radius, y);
+        ctx.lineTo(x + width - radius, y);
+        ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+        ctx.lineTo(x + width, y + height - radius);
+        ctx.quadraticCurveTo(
+          x + width,
+          y + height,
+          x + width - radius,
+          y + height,
+        );
+        ctx.lineTo(x + radius, y + height);
+        ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+        ctx.lineTo(x, y + radius);
+        ctx.quadraticCurveTo(x, y, x + radius, y);
+        ctx.closePath();
+      }
+
+      // Scene 1: Seaside Sunrise
+      function drawScene1(ctx, w, h) {
+        // Sky
+        let sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, "#fe7d6a");
+        sky.addColorStop(0.5, "#ffd166");
+        sky.addColorStop(1, "#06d6a0");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+
+        // Large Sun
+        ctx.fillStyle = "#fffcbb";
+        ctx.beginPath();
+        ctx.arc(w * 0.75, h * 0.35, 75, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Clouds
+        ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+        drawCloud(ctx, w * 0.25, h * 0.2, 45);
+        drawCloud(ctx, w * 0.8, h * 0.15, 30);
+
+        // Water
+        ctx.fillStyle = "#118ab2";
+        ctx.beginPath();
+        ctx.moveTo(0, h * 0.6);
+        for (let x = 0; x <= w; x += 10) {
+          ctx.lineTo(x, h * 0.6 + Math.sin(x * 0.03) * 12);
+        }
+        ctx.lineTo(w, h);
+        ctx.lineTo(0, h);
+        ctx.fill();
+
+        // Cliff
+        ctx.fillStyle = "#5c4e3a";
+        ctx.beginPath();
+        ctx.moveTo(0, h * 0.52);
+        ctx.lineTo(w * 0.35, h * 0.58);
+        ctx.lineTo(w * 0.42, h * 0.8);
+        ctx.lineTo(w * 0.25, h);
+        ctx.lineTo(0, h);
+        ctx.closePath();
+        ctx.fill();
+
+        // Tiny Seagulls
+        ctx.strokeStyle = "#2b2d42";
+        ctx.lineWidth = 3;
+        drawBird(ctx, w * 0.5, h * 0.25, 20);
+        drawBird(ctx, w * 0.6, h * 0.2, 15);
+      }
+
+      // Scene 2: Cozy Forest Cabin
+      function drawScene2(ctx, w, h) {
+        // Deep twilight gradient
+        let sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, "#0d1b2a");
+        sky.addColorStop(0.6, "#1b263b");
+        sky.addColorStop(1, "#415a77");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+
+        // Giant warm glowing moon
+        ctx.fillStyle = "#ffeed6";
+        ctx.beginPath();
+        ctx.arc(w * 0.25, h * 0.25, 60, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pine tree layers (Triangles)
+        ctx.fillStyle = "#1e352f";
+        drawPineTree(ctx, w * 0.75, h * 0.6, 120, 160);
+        ctx.fillStyle = "#142421";
+        drawPineTree(ctx, w * 0.85, h * 0.65, 100, 140);
+        drawPineTree(ctx, w * 0.15, h * 0.7, 110, 150);
+
+        // Cabin Body
+        ctx.fillStyle = "#7a431d"; // brown log wood
+        ctx.fillRect(w * 0.35, h * 0.5, w * 0.3, h * 0.25);
+        // Cabin Roof
+        ctx.fillStyle = "#d62828";
+        ctx.beginPath();
+        ctx.moveTo(w * 0.3, h * 0.5);
+        ctx.lineTo(w * 0.5, h * 0.35);
+        ctx.lineTo(w * 0.7, h * 0.5);
+        ctx.closePath();
+        ctx.fill();
+
+        // Cabin Window with Warm Light
+        ctx.fillStyle = "#fcbf49";
+        ctx.fillRect(w * 0.45, h * 0.56, 40, 40);
+        ctx.strokeStyle = "#5a3015";
+        ctx.lineWidth = 3;
+        ctx.strokeRect(w * 0.45, h * 0.56, 40, 40);
+
+        // Cabin Door
+        ctx.fillStyle = "#4a250c";
+        ctx.fillRect(w * 0.58, h * 0.62, 30, 50);
+
+        // Soft snow/terrain floor
+        ctx.fillStyle = "#e2ece9";
+        ctx.beginPath();
+        ctx.moveTo(0, h * 0.75);
+        ctx.quadraticCurveTo(w * 0.5, h * 0.7, w, h * 0.78);
+        ctx.lineTo(w, h);
+        ctx.lineTo(0, h);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      // Scene 3: Cosmic Odyssey
+      function drawScene3(ctx, w, h) {
+        // Galaxy background
+        let space = ctx.createLinearGradient(0, 0, w, h);
+        space.addColorStop(0, "#0c001c");
+        space.addColorStop(0.5, "#1e003c");
+        space.addColorStop(1, "#020005");
+        ctx.fillStyle = space;
+        ctx.fillRect(0, 0, w, h);
+
+        // Stars
+        ctx.fillStyle = "#ffffff";
+        for (let i = 0; i < 30; i++) {
+          let sSize = Math.random() * 3 + 1;
+          ctx.beginPath();
+          ctx.arc((i * 19) % w, (i * 37) % h, sSize, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // Big striped gas giant planet
+        let pX = w * 0.7;
+        let pY = h * 0.3;
+        ctx.fillStyle = "#f72585";
+        ctx.beginPath();
+        ctx.arc(pX, pY, 70, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Planet Ring
+        ctx.strokeStyle = "rgba(7cc5d9, 114, 239, 0.4)";
+        ctx.lineWidth = 14;
+        ctx.save();
+        ctx.translate(pX, pY);
+        ctx.rotate(-Math.PI / 6);
+        ctx.scale(2.2, 0.2);
+        ctx.beginPath();
+        ctx.arc(0, 0, 60, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+
+        // Beautiful cosmic nebula dust (soft radial shapes)
+        let neb = ctx.createRadialGradient(
+          w * 0.3,
+          h * 0.6,
+          10,
+          w * 0.3,
+          h * 0.6,
+          150,
+        );
+        neb.addColorStop(0, "rgba(114, 9, 183, 0.4)");
+        neb.addColorStop(1, "rgba(114, 9, 183, 0)");
+        ctx.fillStyle = neb;
+        ctx.beginPath();
+        ctx.arc(w * 0.3, h * 0.6, 150, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Flying Space Rocket
+        drawRocket(ctx, w * 0.3, h * 0.55);
+      }
+
+      // Scene 4: Island Lighthouse
+      function drawScene4(ctx, w, h) {
+        // Sunny evening sky
+        let sky = ctx.createLinearGradient(0, 0, 0, h);
+        sky.addColorStop(0, "#f39a59");
+        sky.addColorStop(0.4, "#e76f51");
+        sky.addColorStop(1, "#2a9d8f");
+        ctx.fillStyle = sky;
+        ctx.fillRect(0, 0, w, h);
+
+        // Ocean waves
+        ctx.fillStyle = "#264653";
+        ctx.fillRect(0, h * 0.65, w, h * 0.35);
+
+        // Small islands in background
+        ctx.fillStyle = "#e76f51";
+        ctx.beginPath();
+        ctx.arc(w * 0.8, h * 0.66, 80, Math.PI, 0);
+        ctx.fill();
+
+        // Lighthouse Cliff
+        ctx.fillStyle = "#1d3557";
+        ctx.beginPath();
+        ctx.moveTo(w * 0.1, h);
+        ctx.lineTo(w * 0.2, h * 0.6);
+        ctx.lineTo(w * 0.5, h * 0.62);
+        ctx.lineTo(w * 0.6, h);
+        ctx.closePath();
+        ctx.fill();
+
+        // Tall lighthouse
+        const lhX = w * 0.35;
+        const lhY = h * 0.6;
+        ctx.fillStyle = "#f1faee";
+        ctx.fillRect(lhX - 25, lhY - 180, 50, 180);
+
+        // Red stripes
+        ctx.fillStyle = "#e63946";
+        ctx.fillRect(lhX - 25, lhY - 140, 50, 40);
+        ctx.fillRect(lhX - 25, lhY - 60, 50, 40);
+
+        // Balcony & Lantern Room
+        ctx.fillStyle = "#1d3557";
+        ctx.fillRect(lhX - 35, lhY - 180, 70, 10); // Balcony base
+        ctx.fillRect(lhX - 20, lhY - 210, 40, 30); // Lantern house
+
+        // Light Ray Beams
+        let ray = ctx.createRadialGradient(
+          lhX,
+          lhY - 200,
+          10,
+          lhX - 150,
+          lhY - 190,
+          250,
+        );
+        ray.addColorStop(0, "rgba(255, 236, 179, 0.9)");
+        ray.addColorStop(1, "rgba(255, 236, 179, 0)");
+        ctx.fillStyle = ray;
+        ctx.beginPath();
+        ctx.moveTo(lhX, lhY - 200);
+        ctx.lineTo(lhX - 300, lhY - 280);
+        ctx.lineTo(lhX - 300, lhY - 120);
+        ctx.closePath();
+        ctx.fill();
+
+        // Sea whale splash
+        drawWhale(ctx, w * 0.75, h * 0.78);
+      }
+
+      // Scene 5: Emerald Dragon Mountain
+      function drawScene5(ctx, w, h) {
+        // Dreamy atmospheric background gradient
+        let bg = ctx.createLinearGradient(0, 0, w, h);
+        bg.addColorStop(0, "#003554");
+        bg.addColorStop(0.5, "#006494");
+        bg.addColorStop(1, "#0582ca");
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, w, h);
+
+        // Big mystic golden sun
+        ctx.fillStyle = "#ffd166";
+        ctx.beginPath();
+        ctx.arc(w * 0.5, h * 0.35, 100, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Layered mountain silhouettes
+        ctx.fillStyle = "rgba(10, 80, 110, 0.8)";
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        ctx.lineTo(w * 0.25, h * 0.4);
+        ctx.lineTo(w * 0.5, h * 0.7);
+        ctx.lineTo(w * 0.75, h * 0.35);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fill();
+
+        // Forefront rocks & greenery
+        ctx.fillStyle = "#132a13";
+        ctx.beginPath();
+        ctx.moveTo(0, h);
+        ctx.lineTo(w * 0.1, h * 0.75);
+        ctx.lineTo(w * 0.3, h * 0.65);
+        ctx.lineTo(w * 0.6, h * 0.85);
+        ctx.lineTo(w * 0.8, h * 0.6);
+        ctx.lineTo(w, h);
+        ctx.closePath();
+        ctx.fill();
+
+        // Cute giant pink cloud floating in valleys
+        ctx.fillStyle = "rgba(255, 190, 11, 0.6)";
+        drawCloud(ctx, w * 0.35, h * 0.5, 60);
+        ctx.fillStyle = "rgba(241, 91, 181, 0.6)";
+        drawCloud(ctx, w * 0.6, h * 0.45, 50);
+      }
+
+      // Vector asset helper drawings
+      function drawCloud(ctx, cx, cy, radius) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+        ctx.arc(
+          cx - radius * 0.7,
+          cy + radius * 0.2,
+          radius * 0.7,
+          0,
+          Math.PI * 2,
+        );
+        ctx.arc(
+          cx + radius * 0.7,
+          cy + radius * 0.2,
+          radius * 0.7,
+          0,
+          Math.PI * 2,
+        );
+        ctx.arc(
+          cx + radius * 1.3,
+          cy + radius * 0.4,
+          radius * 0.5,
+          0,
+          Math.PI * 2,
+        );
+        ctx.arc(
+          cx - radius * 1.3,
+          cy + radius * 0.4,
+          radius * 0.5,
+          0,
+          Math.PI * 2,
+        );
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function drawPineTree(ctx, cx, cy, width, height) {
+        ctx.beginPath();
+        ctx.moveTo(cx, cy - height);
+        ctx.lineTo(cx - width / 2, cy - height * 0.5);
+        ctx.lineTo(cx - width / 4, cy - height * 0.5);
+        ctx.lineTo(cx - (width * 0.6) / 2, cy - height * 0.1);
+        ctx.lineTo(cx + (width * 0.6) / 2, cy - height * 0.1);
+        ctx.lineTo(cx + width / 4, cy - height * 0.5);
+        ctx.lineTo(cx + width / 2, cy - height * 0.5);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      function drawBird(ctx, bx, by, wingSpan) {
+        ctx.beginPath();
+        ctx.moveTo(bx - wingSpan, by);
+        ctx.quadraticCurveTo(bx - wingSpan / 2, by - wingSpan / 2, bx, by);
+        ctx.quadraticCurveTo(
+          bx + wingSpan / 2,
+          by - wingSpan / 2,
+          bx + wingSpan,
+          by,
+        );
+        ctx.stroke();
+      }
+
+      function drawWhale(ctx, wx, wy) {
+        // Whale body
+        ctx.fillStyle = "#0a9396";
+        ctx.beginPath();
+        ctx.ellipse(wx, wy, 45, 25, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Whale tail
+        ctx.beginPath();
+        ctx.moveTo(wx - 35, wy - 5);
+        ctx.quadraticCurveTo(wx - 60, wy - 20, wx - 65, wy - 30);
+        ctx.quadraticCurveTo(wx - 55, wy - 10, wx - 45, wy + 5);
+        ctx.closePath();
+        ctx.fill();
+
+        // Spout fountain spray
+        ctx.strokeStyle = "#e0f2fe";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(wx, wy - 20);
+        ctx.quadraticCurveTo(wx - 10, wy - 45, wx - 15, wy - 40);
+        ctx.moveTo(wx, wy - 20);
+        ctx.quadraticCurveTo(wx + 10, wy - 45, wx + 15, wy - 40);
+        ctx.stroke();
+      }
+
+      function drawRocket(ctx, rx, ry) {
+        // Thruster fire trail
+        let fire = ctx.createLinearGradient(rx, ry + 40, rx, ry + 90);
+        fire.addColorStop(0, "#ff9e00");
+        fire.addColorStop(1, "rgba(255, 0, 0, 0)");
+        ctx.fillStyle = fire;
+        ctx.beginPath();
+        ctx.moveTo(rx - 10, ry + 40);
+        ctx.lineTo(rx, ry + 90);
+        ctx.lineTo(rx + 10, ry + 40);
+        ctx.closePath();
+        ctx.fill();
+
+        // Rocket Body
+        ctx.fillStyle = "#f1faee";
+        ctx.beginPath();
+        ctx.moveTo(rx, ry - 40);
+        ctx.quadraticCurveTo(rx + 15, ry - 10, rx + 15, ry + 40);
+        ctx.lineTo(rx - 15, ry + 40);
+        ctx.quadraticCurveTo(rx - 15, ry - 10, rx, ry - 40);
+        ctx.closePath();
+        ctx.fill();
+
+        // Red fins & nose cone
+        ctx.fillStyle = "#e63946";
+        ctx.beginPath();
+        ctx.moveTo(rx, ry - 40);
+        ctx.quadraticCurveTo(rx + 10, ry - 20, rx + 10, ry - 10);
+        ctx.lineTo(rx - 10, ry - 10);
+        ctx.quadraticCurveTo(rx - 10, ry - 20, rx, ry - 40);
+        ctx.closePath();
+        ctx.fill();
+
+        // Left fin
+        ctx.beginPath();
+        ctx.moveTo(rx - 15, ry + 20);
+        ctx.lineTo(rx - 25, ry + 45);
+        ctx.lineTo(rx - 15, ry + 40);
+        ctx.closePath();
+        ctx.fill();
+
+        // Right fin
+        ctx.beginPath();
+        ctx.moveTo(rx + 15, ry + 20);
+        ctx.lineTo(rx + 25, ry + 45);
+        ctx.lineTo(rx + 15, ry + 40);
+        ctx.closePath();
+        ctx.fill();
+
+        // Round window port
+        ctx.fillStyle = "#a8dadc";
+        ctx.beginPath();
+        ctx.arc(rx, ry, 8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Splits the scene region into custom, fitting polyomino puzzle blocks
+      function generatePuzzlePieces(level) {
+        const ox = level.artOffsetCol;
+        const oy = level.artOffsetRow;
+        const w = level.artWidth;
+        const h = level.artHeight;
+
+        // Initialize all cells inside the artwork bounding region as unassigned
+        let artworkCells = [];
+        for (let c = 0; c < w; c++) {
+          for (let r = 0; r < h; r++) {
+            artworkCells.push({
+              col: ox + c,
+              row: oy + r,
+              visited: false,
+            });
+          }
+        }
+
+        let generatedPieces = [];
+        let pieceId = 1;
+
+        // Flood-fill cells to cluster them into cozy polyomino groups of sizes 2 to 4
+        while (artworkCells.some((cell) => !cell.visited)) {
+          let startCell = artworkCells.find((cell) => !cell.visited);
+          let maxPieceSize = Math.floor(Math.random() * 3) + 2; // Size 2, 3 or 4
+          let clusteredCells = [startCell];
+          startCell.visited = true;
+
+          for (let i = 1; i < maxPieceSize; i++) {
+            let candidates = [];
+            clusteredCells.forEach((pc) => {
+              const directions = [
+                [1, 0],
+                [-1, 0],
+                [0, 1],
+                [0, -1],
+              ];
+              directions.forEach(([dc, dr]) => {
+                let tc = pc.col + dc;
+                let tr = pc.row + dr;
+                let targetCell = artworkCells.find(
+                  (cell) => cell.col === tc && cell.row === tr && !cell.visited,
+                );
+                if (targetCell && !candidates.includes(targetCell)) {
+                  candidates.push(targetCell);
+                }
+              });
+            });
+
+            if (candidates.length === 0) break;
+            let nextCell =
+              candidates[Math.floor(Math.random() * candidates.length)];
+            nextCell.visited = true;
+            clusteredCells.push(nextCell);
+          }
+
+          // Gather minimum col and row to create coordinate anchor
+          let minCol = Math.min(...clusteredCells.map((c) => c.col));
+          let minRow = Math.min(...clusteredCells.map((c) => c.row));
+
+          let relativeShape = clusteredCells.map((c) => [
+            c.col - minCol,
+            c.row - minRow,
+          ]);
+
+          generatedPieces.push({
+            id: pieceId++,
+            targetX: minCol,
+            targetY: minRow,
+            x: minCol, // anchor current grid coordinates
+            y: minRow,
+            currentX: minCol, // LERP visually animated coordinate (float px-based)
+            currentY: minRow,
+            cells: relativeShape,
+            dragTargetX: minCol,
+            dragTargetY: minRow,
+          });
+        }
+
+        return generatedPieces;
+      }
+
+      // Scrambles the generated puzzle by performing actual sliding maneuvers to guarantee solvability
+      function scramblePuzzle() {
+        let stepsCount = 100 + currentLevelIndex * 20; // harder levels scramble more
+
+        for (let s = 0; s < stepsCount; s++) {
+          // Select a random piece
+          let randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
+          // Select a random cardinal direction
+          let dirs = [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1],
+          ];
+          let randomDir = dirs[Math.floor(Math.random() * dirs.length)];
+
+          if (
+            canPieceMoveTo(
+              randomPiece,
+              randomPiece.x + randomDir[0],
+              randomPiece.y + randomDir[1],
+            )
+          ) {
+            randomPiece.x += randomDir[0];
+            randomPiece.y += randomDir[1];
+          }
+        }
+
+        // Align current smooth LERP parameters instantly to scramble location
+        pieces.forEach((p) => {
+          p.currentX = p.x;
+          p.currentY = p.y;
+          p.dragTargetX = p.x;
+          p.dragTargetY = p.y;
+        });
+      }
+
+      // Checks if a piece fits in target location (bounds check + non-overlapping)
+      function canPieceMoveTo(movingPiece, targetCol, targetRow) {
+        for (let i = 0; i < movingPiece.cells.length; i++) {
+          let cell = movingPiece.cells[i];
+          let gc = targetCol + cell[0];
+          let gr = targetRow + cell[1];
+
+          // Grid limits check
+          if (gc < 0 || gc >= GRID_COLS || gr < 0 || gr >= GRID_ROWS) {
+            return false;
+          }
+
+          // Overlap test against *other* pieces
+          for (let j = 0; j < pieces.length; j++) {
+            let other = pieces[j];
+            if (other.id === movingPiece.id) continue;
+
+            for (let k = 0; k < other.cells.length; k++) {
+              let otherCell = other.cells[k];
+              if (
+                other.x + otherCell[0] === gc &&
+                other.y + otherCell[1] === gr
+              ) {
+                return false;
+              }
+            }
+          }
+        }
+        return true;
+      }
+
+      // Helper to extract the outer boundary of a polyomino piece as an ordered set of closed loops
+      function getPieceOutlinePath(
+        cells,
+        scaleX,
+        scaleY,
+        offsetCol,
+        offsetRow,
+      ) {
+        const cellSet = new Set(cells.map(([dc, dr]) => `${dc},${dr}`));
+        const edges = [];
+
+        cells.forEach(([dc, dr]) => {
+          const hasTop = cellSet.has(`${dc},${dr - 1}`);
+          const hasRight = cellSet.has(`${dc + 1},${dr}`);
+          const hasBottom = cellSet.has(`${dc},${dr + 1}`);
+          const hasLeft = cellSet.has(`${dc - 1},${dr}`);
+
+          if (!hasTop) {
+            edges.push({ p1: { x: dc, y: dr }, p2: { x: dc + 1, y: dr } });
+          }
+          if (!hasRight) {
+            edges.push({
+              p1: { x: dc + 1, y: dr },
+              p2: { x: dc + 1, y: dr + 1 },
+            });
+          }
+          if (!hasBottom) {
+            edges.push({
+              p1: { x: dc + 1, y: dr + 1 },
+              p2: { x: dc, y: dr + 1 },
+            });
+          }
+          if (!hasLeft) {
+            edges.push({ p1: { x: dc, y: dr + 1 }, p2: { x: dc, y: dr } });
+          }
+        });
+
+        const loops = [];
+        const used = new Set();
+
+        while (used.size < edges.length) {
+          let startEdgeIdx = -1;
+          for (let i = 0; i < edges.length; i++) {
+            if (!used.has(i)) {
+              startEdgeIdx = i;
+              break;
+            }
+          }
+          if (startEdgeIdx === -1) break;
+
+          const loop = [];
+          let currentEdge = edges[startEdgeIdx];
+          used.add(startEdgeIdx);
+
+          loop.push(currentEdge.p1);
+          let currentPt = currentEdge.p2;
+
+          let steps = 0;
+          const maxSteps = edges.length * 2;
+          while (steps < maxSteps) {
+            let nextIdx = -1;
+            for (let i = 0; i < edges.length; i++) {
+              if (used.has(i)) continue;
+              const edge = edges[i];
+              if (
+                Math.abs(edge.p1.x - currentPt.x) < 0.01 &&
+                Math.abs(edge.p1.y - currentPt.y) < 0.01
+              ) {
+                nextIdx = i;
+                break;
+              }
+            }
+
+            if (nextIdx !== -1) {
+              used.add(nextIdx);
+              loop.push(edges[nextIdx].p1);
+              currentPt = edges[nextIdx].p2;
+            } else {
+              break;
+            }
+            steps++;
+          }
+          loops.push(loop);
+        }
+
+        return loops.map((loop) => {
+          return loop.map((pt) => ({
+            x: (offsetCol + pt.x) * scaleX,
+            y: (offsetRow + pt.y) * scaleY,
+          }));
+        });
+      }
+
+      // Creates the continuous path with rounded corners from calculated loops
+      function createPiecePath(ctx, loops, radius) {
+        ctx.beginPath();
+        loops.forEach((loop) => {
+          if (loop.length < 3) return;
+          const first = loop[0];
+          const last = loop[loop.length - 1];
+          ctx.moveTo((first.x + last.x) / 2, (first.y + last.y) / 2);
+
+          for (let i = 0; i < loop.length; i++) {
+            const current = loop[i];
+            const next = loop[(i + 1) % loop.length];
+            ctx.arcTo(current.x, current.y, next.x, next.y, radius);
+          }
+          ctx.closePath();
+        });
+      }
+
+      function render() {
+        ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+        // Calculate opacity values for visual completion transitions
+        const backdropAlpha = isSolved ? 1 - completionProgress : 1;
+
+        // 1. Draw grid backdrop slots (fades out as puzzle completes)
+        ctx.save();
+        ctx.globalAlpha = backdropAlpha;
+        for (let c = 0; c < GRID_COLS; c++) {
+          for (let r = 0; r < GRID_ROWS; r++) {
+            ctx.fillStyle = "#cdc2ab";
+            let pad = 4;
+            drawRoundedRect(
+              ctx,
+              c * CELL_SIZE + pad,
+              r * CELL_SIZE + pad,
+              CELL_SIZE - pad * 2,
+              CELL_SIZE - pad * 2,
+              14,
+            );
+            ctx.fill();
+
+            // Inner slot shadow
+            ctx.strokeStyle = "#b8ae9a";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+          }
+        }
+        ctx.restore();
+
+        // 2. Render hint/preview underlay if activated
+        if (showHint) {
+          ctx.save();
+          ctx.globalAlpha = 0.35;
+          ctx.drawImage(sceneCanvas, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+          ctx.restore();
+        }
+
+        // 3. Draw pieces seamlessly with NO interior borders
+        const sortedPieces = [...pieces].sort((a, b) => {
+          const aActive = activePiece && a.id === activePiece.id ? 1 : 0;
+          const bActive = activePiece && b.id === activePiece.id ? 1 : 0;
+          return aActive - bActive;
+        });
+
+        sortedPieces.forEach((p) => {
+          let isCurrentPieceActive = activePiece && activePiece.id === p.id;
+
+          // Get visual outline loop based on smoothed slide position
+          const visualLoops = getPieceOutlinePath(
+            p.cells,
+            CELL_SIZE,
+            CELL_SIZE,
+            p.currentX,
+            p.currentY,
+          );
+          const radius = CELL_SIZE * 0.16; // proportional corner rounding
+
+          ctx.save();
+
+          // Build a unified mask/clipping region for the entire group
+          createPiecePath(ctx, visualLoops, radius);
+          ctx.clip();
+
+          // Draw the clipped scene texture perfectly aligned to movement
+          const offsetX = (p.currentX - p.targetX) * CELL_SIZE;
+          const offsetY = (p.currentY - p.targetY) * CELL_SIZE;
+          ctx.drawImage(sceneCanvas, offsetX, offsetY);
+
+          ctx.restore();
+
+          // Draw external border around the entire polyomino group as a single combined tile
+          ctx.save();
+          createPiecePath(ctx, visualLoops, radius);
+
+          if (isSolved) {
+            // Smoothly dissolve the tile boundaries during the completion animation
+            ctx.strokeStyle = `rgba(61, 53, 38, ${1 - completionProgress})`;
+            ctx.lineWidth = 4 * (1 - completionProgress);
+            if (ctx.lineWidth > 0.1) {
+              ctx.stroke();
+            }
+          } else if (isCurrentPieceActive) {
+            // Bright white outer highlight with gentle visual glow when grabbed
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 6;
+            ctx.shadowColor = "rgba(255, 255, 255, 0.8)";
+            ctx.shadowBlur = 10;
+            ctx.stroke();
+          } else {
+            // Standard dark outer border
+            ctx.strokeStyle = "#3d3526";
+            ctx.lineWidth = 4;
+            ctx.stroke();
+
+            // Delicate 3D highlight on top-left outer borders
+            ctx.save();
+            ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+            ctx.lineWidth = 2;
+            ctx.translate(-1.5, -1.5);
+            ctx.stroke();
+            ctx.restore();
+          }
+          ctx.restore();
+        });
+
+        // 4. Overlap complete, pristine seamless image to erase any subpixel gaps as tiles merge
+        if (isSolved && completionProgress > 0) {
+          ctx.save();
+          ctx.globalAlpha = completionProgress;
+          ctx.drawImage(sceneCanvas, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+          ctx.restore();
+        }
+
+        // 5. Update and render sparkles / particle fireworks on win
+        updateAndRenderParticles();
+      }
+
+      // Particle dynamics for successful complete solve bursts
+      function createSolveChimeConfetti() {
+        for (let i = 0; i < 90; i++) {
+          particles.push({
+            x: CANVAS_SIZE / 2,
+            y: CANVAS_SIZE / 2,
+            vx: (Math.random() - 0.5) * 14,
+            vy: (Math.random() - 0.5) * 14 - 4,
+            color: `hsl(${Math.random() * 360}, 100%, 75%)`,
+            size: Math.random() * 8 + 5,
+            alpha: 1,
+            decay: Math.random() * 0.015 + 0.008,
+          });
+        }
+      }
+
+      function updateAndRenderParticles() {
+        particles.forEach((p, idx) => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.15; // Soft gravity
+          p.alpha -= p.decay;
+
+          if (p.alpha <= 0) {
+            particles.splice(idx, 1);
+            return;
+          }
+
+          ctx.save();
+          ctx.globalAlpha = p.alpha;
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        });
+      }
+
+      function animate() {
+        // Apply LERP physics to smoothly glide tile anchors
+        let moving = false;
+        pieces.forEach((p) => {
+          if (isDragging && activePiece && p.id === activePiece.id) {
+            // Smoothly slide piece under the cursor/finger coordinates
+            const dx = p.dragTargetX - p.currentX;
+            const dy = p.dragTargetY - p.currentY;
+            p.currentX += dx * 0.4;
+            p.currentY += dy * 0.4;
+            moving = true;
+          } else {
+            const dx = p.x - p.currentX;
+            const dy = p.y - p.currentY;
+
+            if (Math.abs(dx) > 0.005) {
+              p.currentX += dx * 0.24;
+              moving = true;
+            } else {
+              p.currentX = p.x;
+            }
+
+            if (Math.abs(dy) > 0.005) {
+              p.currentY += dy * 0.24;
+              moving = true;
+            } else {
+              p.currentY = p.y;
+            }
+          }
+        });
+
+        // Smooth completion animation that merges tiles into a single seamless frame
+        if (isSolved && isCompletingAnimation) {
+          completionProgress += 0.015; // Progresses over ~66 frames (~1.1 seconds)
+          if (completionProgress >= 1) {
+            completionProgress = 1;
+            isCompletingAnimation = false;
+
+            // Trigger delayed win banner slide-in
+            const winBanner = document.getElementById("winBanner");
+            const winCard = document.getElementById("winCard");
+            const winStats = document.getElementById("winStats");
+
+            winStats.innerText = `Completed in ${moveCount} moves & ${formatTime(timeElapsed)}!`;
+            winBanner.classList.remove("opacity-0", "pointer-events-none");
+            winCard.classList.remove("scale-95");
+            winCard.classList.add("scale-100");
+          }
+        }
+
+        render();
+        requestAnimationFrame(animate);
+      }
+
+      // Return piece coordinates clicked on canvas
+      function getPreciseCoordsFromEvent(e) {
+        const rect = canvas.getBoundingClientRect();
+        // Calculate coordinates based on responsive layout mapping to 600x600 grid space
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const x = ((clientX - rect.left) / rect.width) * CANVAS_SIZE;
+        const y = ((clientY - rect.top) / rect.height) * CANVAS_SIZE;
+        return { x, y };
+      }
+
+      function onStart(e) {
+        if (isSolved) return;
+        const { x, y } = getPreciseCoordsFromEvent(e);
+        const col = Math.floor(x / CELL_SIZE);
+        const row = Math.floor(y / CELL_SIZE);
+
+        // Find clicked piece
+        let clickedPiece = pieces.find((p) => {
+          return p.cells.some(([dc, dr]) => {
+            return p.x + dc === col && p.y + dr === row;
+          });
+        });
+
+        if (clickedPiece) {
+          activePiece = clickedPiece;
+          dragStartGridX = clickedPiece.x;
+          dragStartGridY = clickedPiece.y;
+          dragOffsetX = x / CELL_SIZE - clickedPiece.x;
+          dragOffsetY = y / CELL_SIZE - clickedPiece.y;
+          isDragging = true;
+
+          // Setup initial drag target points
+          activePiece.dragTargetX = clickedPiece.x;
+          activePiece.dragTargetY = clickedPiece.y;
+
+          playSlideSound();
+          e.preventDefault();
+        }
+      }
+
+      function onMove(e) {
+        if (!isDragging || !activePiece || isSolved) return;
+
+        const { x, y } = getPreciseCoordsFromEvent(e);
+
+        // Set smooth sliding visual targets for current active piece tracking
+        activePiece.dragTargetX = x / CELL_SIZE - dragOffsetX;
+        activePiece.dragTargetY = y / CELL_SIZE - dragOffsetY;
+
+        e.preventDefault();
+      }
+
+      function onEnd() {
+        if (!isDragging || !activePiece) return;
+
+        // Find the nearest whole grid cell drop target
+        const dropCol = Math.round(activePiece.currentX);
+        const dropRow = Math.round(activePiece.currentY);
+
+        // Check if it fits at the drop location
+        if (canPieceMoveTo(activePiece, dropCol, dropRow)) {
+          // Drop placement is legal! Snap it in
+          if (dropCol !== dragStartGridX || dropRow !== dragStartGridY) {
+            activePiece.x = dropCol;
+            activePiece.y = dropRow;
+            moveCount++;
+            document.getElementById("moveCounter").innerText = moveCount;
+            playSnapSound();
+            checkPuzzleWinCondition();
+          } else {
+            // Dropped back in its starting location
+            activePiece.x = dragStartGridX;
+            activePiece.y = dragStartGridY;
+          }
+        } else {
+          // Invalid location! Elastic snap back to start (and trigger return animation)
+          activePiece.x = dragStartGridX;
+          activePiece.y = dragStartGridY;
+          playSlideSound(); // Gentle sound alerting slide-back
+        }
+
+        isDragging = false;
+        activePiece = null;
+      }
+
+      // Add event listeners supporting both desktop mouse and mobile touch inputs
+      canvas.addEventListener("mousedown", onStart);
+      canvas.addEventListener("mousemove", onMove);
+      window.addEventListener("mouseup", onEnd);
+
+      canvas.addEventListener("touchstart", onStart, { passive: false });
+      canvas.addEventListener("touchmove", onMove, { passive: false });
+      window.addEventListener("touchend", onEnd);
+
+      function checkPuzzleWinCondition() {
+        let correctPieces = 0;
+        pieces.forEach((p) => {
+          if (p.x === p.targetX && p.y === p.targetY) {
+            correctPieces++;
+          }
+        });
+
+        // Update Restored % UI
+        const percentage = Math.round((correctPieces / pieces.length) * 100);
+        document.getElementById("progressPercentage").innerText =
+          percentage + "%";
+
+        if (correctPieces === pieces.length) {
+          // Winning state triggered!
+          isSolved = true;
+          isCompletingAnimation = true;
+          completionProgress = 0;
+
+          clearInterval(timerInterval);
+          playWinSound();
+          createSolveChimeConfetti();
+        }
+      }
+
+      function formatTime(secs) {
+        let mins = Math.floor(secs / 60);
+        let remSecs = secs % 60;
+        return `${mins}:${remSecs < 10 ? "0" : ""}${remSecs}`;
+      }
+
+      function startTimer() {
+        clearInterval(timerInterval);
+        timeElapsed = 0;
+        document.getElementById("gameTimer").innerText = "0:00";
+        timerInterval = setInterval(() => {
+          timeElapsed++;
+          document.getElementById("gameTimer").innerText =
+            formatTime(timeElapsed);
+        }, 1000);
+      }
+
+      function restartLevel() {
+        // Re-shuffle current layout
+        moveCount = 0;
+        document.getElementById("moveCounter").innerText = "0";
+        document.getElementById("progressPercentage").innerText = "0%";
+
+        // Hide Win Banner
+        const winBanner = document.getElementById("winBanner");
+        winBanner.classList.add("opacity-0", "pointer-events-none");
+
+        isSolved = false;
+        isCompletingAnimation = false;
+        completionProgress = 0;
+
+        scramblePuzzle();
+        startTimer();
+        if (soundEnabled) playSnapSound();
+      }
+
+      function loadLevel(index) {
+        currentLevelIndex = index;
+        const lvl = levels[currentLevelIndex];
+
+        GRID_COLS = lvl.gridCols;
+        GRID_ROWS = lvl.gridRows;
+        CELL_SIZE = CANVAS_SIZE / GRID_COLS;
+
+        sctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+        if (lvl.isCustom) {
+          // Draw custom uploaded image to offscreen canvas
+          const img = new Image();
+          img.onload = function () {
+            // Handle responsive cover crop / centering on 600x600 canvas
+            let imgRatio = img.width / img.height;
+            let sx = 0,
+              sy = 0,
+              sw = img.width,
+              sh = img.height;
+
+            if (imgRatio > 1) {
+              // landscape image
+              sw = img.height;
+              sx = (img.width - sw) / 2;
+            } else {
+              // portrait image
+              sh = img.width;
+              sy = (img.height - sh) / 2;
+            }
+            sctx.drawImage(img, sx, sy, sw, sh, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
+
+            // Proceed to set pieces & shuffle once image data is prepared
+            initiateLevelLaunch(lvl);
+          };
+          img.src = lvl.customImageDataUrl;
+        } else {
+          // Classic vector render
+          lvl.renderFn(sctx, CANVAS_SIZE, CANVAS_SIZE);
+          initiateLevelLaunch(lvl);
+        }
+      }
+
+      function initiateLevelLaunch(lvl) {
+        // Populate metadata UI
+        document.getElementById("levelSubtitle").innerText = lvl.subtitle;
+        document.getElementById("levelName").innerText = lvl.name;
+
+        // Generate customized puzzle tiling polyominoes
+        pieces = generatePuzzlePieces(lvl);
+
+        // Refresh chip layout highlighting
+        renderLevelChips();
+
+        restartLevel();
+      }
+
+      function nextLevel() {
+        let nextIndex = (currentLevelIndex + 1) % levels.length;
+        loadLevel(nextIndex);
+      }
+
+      function renderLevelChips() {
+        const container = document.getElementById("levelChips");
+        container.innerHTML = "";
+
+        levels.forEach((lvl, idx) => {
+          const btn = document.createElement("button");
+          btn.className = `px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl transition-all border ${
+            idx === currentLevelIndex
+              ? "bg-[#a8dadc] text-[#1d3557] border-[#457b9d] shadow-sm"
+              : "bg-[#faf6ee] text-[#5e5445] hover:bg-white border-[#d3c9b5] btn-shadow"
+          }`;
+          btn.innerText = lvl.isCustom ? `📸 ${lvl.name}` : `${idx + 1}`;
+          btn.onclick = () => loadLevel(idx);
+          container.appendChild(btn);
+        });
+      }
+
+      // Custom Creator Controllers & Image processing
+      function openCustomCreator() {
+        // Reset input form parameters
+        document.getElementById("imageInput").value = "";
+        document.getElementById("customTitleInput").value = "";
+        document.getElementById("imagePreview").src = "";
+        document.getElementById("imagePreview").classList.add("hidden");
+        document
+          .getElementById("dropzonePlaceholder")
+          .classList.remove("hidden");
+        document.getElementById("createLevelBtn").disabled = true;
+        uploadedImgDataUrl = null;
+
+        setCreatorDifficulty("medium");
+
+        const modal = document.getElementById("creatorModal");
+        modal.classList.remove("opacity-0", "pointer-events-none");
+        modal.querySelector("div").classList.add("scale-100");
+        modal.querySelector("div").classList.remove("scale-95");
+      }
+
+      function closeCustomCreator() {
+        const modal = document.getElementById("creatorModal");
+        modal.classList.add("opacity-0", "pointer-events-none");
+        modal.querySelector("div").classList.remove("scale-100");
+        modal.querySelector("div").classList.add("scale-95");
+      }
+
+      function handleImageSelection(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          uploadedImgDataUrl = e.target.result;
+
+          // Show thumbnail preview
+          const preview = document.getElementById("imagePreview");
+          preview.src = uploadedImgDataUrl;
+          preview.classList.remove("hidden");
+          document
+            .getElementById("dropzonePlaceholder")
+            .classList.add("hidden");
+
+          // Enable submission button
+          document.getElementById("createLevelBtn").disabled = false;
+        };
+        reader.readAsDataURL(file);
+      }
+
+      function setCreatorDifficulty(diff) {
+        creatorDifficulty = diff;
+
+        // Clean active border flags
+        const buttons = document.querySelectorAll(".diff-btn");
+        buttons.forEach((btn) => {
+          btn.classList.remove(
+            "border-[#2a9d8f]",
+            "bg-[#d8f3dc]",
+            "ring-2",
+            "ring-[#2a9d8f]",
+          );
+          btn.classList.add("border-[#d3c9b5]", "bg-[#faf6ee]");
+        });
+
+        // Highlight target selector
+        const activeBtn = document.getElementById(`diff-${diff}`);
+        if (activeBtn) {
+          activeBtn.classList.remove("border-[#d3c9b5]", "bg-[#faf6ee]");
+          activeBtn.classList.add(
+            "border-[#2a9d8f]",
+            "bg-[#d8f3dc]",
+            "ring-2",
+            "ring-[#2a9d8f]",
+          );
+        }
+      }
+
+      function submitCustomLevel() {
+        if (!uploadedImgDataUrl) return;
+
+        const userTitle = document
+          .getElementById("customTitleInput")
+          .value.trim();
+        const levelTitle =
+          userTitle ||
+          `Custom Art ${levels.filter((l) => l.isCustom).length + 1}`;
+
+        // Map configured difficulty parameters to division slots
+        let gridCols, gridRows, artWidth, artHeight;
+        if (creatorDifficulty === "easy") {
+          gridCols = 5;
+          gridRows = 5;
+          artWidth = 3;
+          artHeight = 3;
+        } else if (creatorDifficulty === "medium") {
+          gridCols = 7;
+          gridRows = 7;
+          artWidth = 5;
+          artHeight = 5;
+        } else if (creatorDifficulty === "hard") {
+          gridCols = 9;
+          gridRows = 9;
+          artWidth = 7;
+          artHeight = 7;
+        } else {
+          // expert
+          gridCols = 11;
+          gridRows = 11;
+          artWidth = 9;
+          artHeight = 9;
+        }
+
+        const newCustomLevel = {
+          name: levelTitle,
+          subtitle: `Custom Level - ${creatorDifficulty.toUpperCase()}`,
+          gridCols: gridCols,
+          gridRows: gridRows,
+          artWidth: artWidth,
+          artHeight: artHeight,
+          artOffsetCol: 1, // center within 1-cell empty margin borders
+          artOffsetRow: 1,
+          isCustom: true,
+          customImageDataUrl: uploadedImgDataUrl,
+        };
+
+        // Push to levels list and set as current active level
+        levels.push(newCustomLevel);
+        closeCustomCreator();
+        loadLevel(levels.length - 1);
+      }
+
+      // How-To overlay controllers
+      function toggleHowTo(show) {
+        const modal = document.getElementById("howToModal");
+        if (show) {
+          modal.classList.remove("opacity-0", "pointer-events-none");
+          modal.querySelector("div").classList.add("scale-100");
+          modal.querySelector("div").classList.remove("scale-95");
+        } else {
+          modal.classList.add("opacity-0", "pointer-events-none");
+          modal.querySelector("div").classList.remove("scale-100");
+          modal.querySelector("div").classList.add("scale-95");
+        }
+      }
+
+      // Preview Solve (Hint functionality)
+      const hintBtn = document.getElementById("hintBtn");
+      hintBtn.addEventListener("mousedown", () => {
+        showHint = true;
+      });
+      hintBtn.addEventListener("mouseup", () => {
+        showHint = false;
+      });
+      hintBtn.addEventListener("mouseleave", () => {
+        showHint = false;
+      });
+
+      hintBtn.addEventListener(
+        "touchstart",
+        (e) => {
+          showHint = true;
+          e.preventDefault();
+        },
+        { passive: false },
+      );
+      hintBtn.addEventListener(
+        "touchend",
+        (e) => {
+          showHint = false;
+          e.preventDefault();
+        },
+        { passive: false },
+      );
+
+      window.onload = () => {
+        // Boot first level configuration
+        loadLevel(0);
+
+        // Activate core canvas ticking loop
+        animate();
+
+        // Show cozy tutorial slide deck at entry
+        setTimeout(() => {
+          toggleHowTo(true);
+        }, 600);
+      };
+    </script>
+  </body>
+</html>
