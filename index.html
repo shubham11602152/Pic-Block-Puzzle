@@ -279,7 +279,7 @@
       class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300"
     >
       <div
-        class="bg-[#faf6ee] rounded-3xl max-w-lg w-full p-6 shadow-2xl border-4 border-[#3d3526] transform scale-95 transition-all"
+        class="bg-[#faf6ee] rounded-3xl max-w-lg w-full p-6 shadow-2xl border-4 border-[#3d3526] transform scale-95 transition-all h-[100%] overflow-y-auto"
       >
         <div class="flex justify-between items-start mb-4">
           <h3 class="text-2xl font-bold text-[#5e5445]">
@@ -292,7 +292,7 @@
             &times;
           </button>
         </div>
-        <div class="space-y-3 text-sm text-[#5e5445] leading-relaxed">
+        <div class="space-y-3 text-sm text-[#5e5445] leading-relaxed h-auto">
           <div class="flex gap-3 items-start bg-[#eae3d2]/40 p-3 rounded-xl">
             <span class="text-xl">🎴</span>
             <p>
@@ -327,7 +327,7 @@
         </div>
         <button
           onclick="toggleHowTo(false)"
-          class="mt-6 w-full py-3 bg-[#d9cfb9] hover:bg-[#cdc2ab] text-[#5e5445] font-bold rounded-2xl transition-all border border-[#bfae95] btn-shadow"
+          class="mt-6 w-full py-3 bg-[#d9cfb9] hover:bg-[#cdc2ab] text-[#5e5445] font-bold rounded-2xl transition-all border border-[#bfae95] btn-shadow sticky bottom-4"
         >
           Start Restoring Art
         </button>
@@ -510,10 +510,34 @@
 
       function getRandomDifficultyConfig(level) {
         const configs = [
-          { difficulty: "easy", gridCols: 5, gridRows: 5, artWidth: 3, artHeight: 3 },
-          { difficulty: "medium", gridCols: 7, gridRows: 7, artWidth: 5, artHeight: 5 },
-          { difficulty: "hard", gridCols: 9, gridRows: 9, artWidth: 7, artHeight: 7 },
-          { difficulty: "expert", gridCols: 11, gridRows: 11, artWidth: 9, artHeight: 9 },
+          {
+            difficulty: "easy",
+            gridCols: 5,
+            gridRows: 5,
+            artWidth: 3,
+            artHeight: 3,
+          },
+          {
+            difficulty: "medium",
+            gridCols: 7,
+            gridRows: 7,
+            artWidth: 5,
+            artHeight: 5,
+          },
+          {
+            difficulty: "hard",
+            gridCols: 9,
+            gridRows: 9,
+            artWidth: 7,
+            artHeight: 7,
+          },
+          {
+            difficulty: "expert",
+            gridCols: 11,
+            gridRows: 11,
+            artWidth: 9,
+            artHeight: 9,
+          },
         ];
         return (
           configs.find((config) => config.difficulty === level) ||
