@@ -508,6 +508,35 @@
       // Custom particles system for fireworks/confetti
       let particles = [];
 
+      function getRandomDifficultyConfig(level) {
+        const configs = [
+          { difficulty: "easy", gridCols: 5, gridRows: 5, artWidth: 3, artHeight: 3 },
+          { difficulty: "medium", gridCols: 7, gridRows: 7, artWidth: 5, artHeight: 5 },
+          { difficulty: "hard", gridCols: 9, gridRows: 9, artWidth: 7, artHeight: 7 },
+          { difficulty: "expert", gridCols: 11, gridRows: 11, artWidth: 9, artHeight: 9 },
+        ];
+        return (
+          configs.find((config) => config.difficulty === level) ||
+          configs[Math.floor(Math.random() * configs.length)]
+        );
+      }
+
+      function createCustomLevelEntry(name, imagePath, level) {
+        const config = getRandomDifficultyConfig(level);
+        return {
+          name,
+          subtitle: `Custom Level - ${config.difficulty.toUpperCase()}`,
+          gridCols: config.gridCols,
+          gridRows: config.gridRows,
+          artWidth: config.artWidth,
+          artHeight: config.artHeight,
+          artOffsetCol: 1,
+          artOffsetRow: 1,
+          isCustom: true,
+          customImageDataUrl: imagePath,
+        };
+      }
+
       // Definition of Level Art scenes and their positions
       const levels = [
         {
@@ -570,6 +599,51 @@
           renderFn: drawScene5,
           isCustom: false,
         },
+        createCustomLevelEntry(
+          "Adventure Time",
+          "assets/levels/adventure-time.jpeg",
+          "expert",
+        ),
+        createCustomLevelEntry(
+          "Chicken Shop",
+          "assets/levels/chicken-shop.webp",
+          "expert",
+        ),
+        createCustomLevelEntry(
+          "Coffee Shop",
+          "assets/levels/coffee-shop.webp",
+          "expert",
+        ),
+        createCustomLevelEntry(
+          "Cozy Room",
+          "assets/levels/cozy-room.gif",
+          "expert",
+        ),
+        createCustomLevelEntry(
+          "Farm House",
+          "assets/levels/farm-house.gif",
+          "expert",
+        ),
+        createCustomLevelEntry(
+          "Jungle Night",
+          "assets/levels/jungle-night.jpeg",
+          "expert",
+        ),
+        createCustomLevelEntry(
+          "Old Home",
+          "assets/levels/old-home.webp",
+          "expert",
+        ),
+        createCustomLevelEntry(
+          "Retro Desk",
+          "assets/levels/retro-desk.jpeg",
+          "expert",
+        ),
+        createCustomLevelEntry(
+          "Robolox Land",
+          "assets/levels/robolox-land.jpeg",
+          "expert",
+        ),
       ];
 
       let ambientSynth, slideSynth, chimeSynth;
@@ -2017,6 +2091,7 @@
 
         // Push to levels list and set as current active level
         levels.push(newCustomLevel);
+        console.log({ levels });
         closeCustomCreator();
         loadLevel(levels.length - 1);
       }
