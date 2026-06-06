@@ -44,7 +44,7 @@
     >
       <div class="flex flex-col">
         <h1
-          class="text-3xl font-bold tracking-tight text-[#5e5445] flex items-center gap-2"
+          class="text-2xl font-bold tracking-tight text-[#5e5445] flex items-center gap-2"
         >
           <span>🧩</span> PicBlocks
         </h1>
@@ -185,50 +185,47 @@
       <div
         class="w-full lg:w-5/12 flex flex-col gap-4 self-stretch justify-center"
       >
-        <!-- Level Title Card -->
+        <!-- Level Title + Tools Card -->
         <div
-          class="bg-[#faf6ee] p-4 rounded-2xl border border-[#d3c9b5] shadow-sm flex justify-between items-center"
+          class="bg-[#faf6ee] p-4 rounded-2xl border border-[#d3c9b5] shadow-sm flex flex-col gap-4"
         >
-          <div class="flex flex-col">
-            <span
-              class="text-xs text-[#8c7e6c] font-semibold uppercase tracking-wider"
-              id="levelSubtitle"
-              >Level 1</span
+          <div class="flex flex-row items-center justify-between gap-4">
+            <div class="flex flex-col">
+              <span
+                class="text-xs text-[#8c7e6c] font-semibold uppercase tracking-wider"
+                id="levelSubtitle"
+                >Level 1</span
+              >
+              <span class="text-xl font-bold text-[#5e5445]" id="levelName"
+                >Seaside Sunrise</span
+              >
+            </div>
+            <!-- Timer Display -->
+            <div
+              class="px-3.5 py-1.5 bg-[#eae3d2] rounded-xl font-bold text-lg text-[#5e5445] text-center border border-[#d3c9b5] shadow-inner flex items-center justify-center gap-1.5"
             >
-            <span class="text-xl font-bold text-[#5e5445]" id="levelName"
-              >Seaside Sunrise</span
-            >
+              <span class="text-[#8c7e6c]">⏱️</span>
+              <span id="gameTimer">0:00</span>
+            </div>
           </div>
-          <!-- Timer Display -->
-          <div
-            class="px-3.5 py-1.5 bg-[#eae3d2] rounded-xl font-bold text-lg text-[#5e5445] text-center border border-[#d3c9b5] shadow-inner flex items-center justify-center gap-1.5"
-          >
-            <span class="text-[#8c7e6c]">⏱️</span>
-            <span id="gameTimer">0:00</span>
-          </div>
-        </div>
 
-        <div
-          class="bg-[#faf6ee] p-3 rounded-2xl border border-[#d3c9b5] flex justify-between items-center gap-3"
-        >
-          <span class="text-sm font-semibold text-[#5e5445]">Tools:</span>
-          <div class="flex gap-2 w-full justify-end">
-            <!-- Hint / Preview Button -->
-            <button
-              id="hintBtn"
-              class="flex-1 max-w-[120px] py-2 bg-[#eae3d2] text-[#5e5445] font-bold text-sm rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5] flex items-center justify-center gap-1.5"
-              title="Hold to Preview Solve"
-            >
-              <span>👁️</span> Peek
-            </button>
-            <!-- Restart/Scramble -->
-            <button
-              onclick="restartLevel()"
-              class="flex-1 max-w-[120px] py-2 bg-[#eae3d2] text-[#5e5445] font-bold text-sm rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5] flex items-center justify-center gap-1.5"
-              title="Rescramble Puzzle"
-            >
-              <span>🔄</span> Scramble
-            </button>
+          <div class="bg-[#eae3d2]/80 p-3 rounded-2xl border border-[#d3c9b5]">
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                id="hintBtn"
+                class="w-full py-2 bg-[#faf6ee] text-[#5e5445] font-bold text-sm rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5] flex items-center justify-center gap-1.5"
+                title="Hold to Preview Solve"
+              >
+                <span>👁️</span> Peek
+              </button>
+              <button
+                onclick="restartLevel()"
+                class="w-full py-2 bg-[#faf6ee] text-[#5e5445] font-bold text-sm rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5] flex items-center justify-center gap-1.5"
+                title="Rescramble Puzzle"
+              >
+                <span>🔄</span> Scramble
+              </button>
+            </div>
           </div>
         </div>
       </div>
