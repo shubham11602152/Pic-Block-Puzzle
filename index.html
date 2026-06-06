@@ -500,6 +500,51 @@
       let solvedOffsetY = 0; // translation offset on win
       let showHint = false;
       let soundEnabled = true;
+      const ambientProgressionsBank = [
+        [
+          ["C4", "E4", "G4", "B4"],
+          ["F3", "A3", "C4", "E4"],
+          ["A3", "C4", "E4", "G4"],
+          ["G3", "B3", "D4", "G4"],
+        ],
+        [
+          ["D4", "F#4", "A4", "C5"],
+          ["G3", "B3", "D4", "F#4"],
+          ["E3", "G#3", "B3", "D4"],
+          ["A3", "C#4", "E4", "G4"],
+        ],
+        [
+          ["E4", "G4", "B4", "D5"],
+          ["C4", "E4", "G4", "B4"],
+          ["A3", "C4", "E4", "G4"],
+          ["B3", "D4", "F#4", "A4"],
+        ],
+        [
+          ["G4", "B4", "D5", "F#5"],
+          ["C4", "E4", "G4", "B4"],
+          ["A3", "C4", "E4", "G4"],
+          ["D4", "F#4", "A4", "C5"],
+        ],
+        [
+          ["F4", "A4", "C5", "E5"],
+          ["Bb3", "D4", "F4", "A4"],
+          ["G3", "B3", "D4", "F4"],
+          ["C4", "F4", "A4", "C5"],
+        ],
+        [
+          ["A4", "C5", "E5", "G5"],
+          ["F4", "A4", "C5", "E5"],
+          ["D4", "F#4", "A4", "C5"],
+          ["E4", "G#4", "B4", "D5"],
+        ],
+      ];
+      let activeAmbientProgression = null;
+
+      function pickAmbientProgressionForLevel(index) {
+        return ambientProgressionsBank[
+          Math.floor(Math.random() * ambientProgressionsBank.length)
+        ];
+      }
 
       // Custom level upload state
       let uploadedImgDataUrl = null;
@@ -729,12 +774,9 @@
         Tone.start();
 
         // Quiet, soothing 4-chord progressive pattern playing infinitely
-        const progressions = [
-          ["C4", "E4", "G4", "B4"],
-          ["F3", "A3", "C4", "E4"],
-          ["A3", "C4", "E4", "G4"],
-          ["G3", "B3", "D4", "G4"],
-        ];
+        const progressions =
+          activeAmbientProgression ||
+          pickAmbientProgressionForLevel(currentLevelIndex);
         let currentChord = 0;
 
         clearInterval(ambientInterval);
@@ -2029,6 +2071,7 @@
 
       function loadLevel(index) {
         currentLevelIndex = index;
+        activeAmbientProgression = pickAmbientProgressionForLevel(index);
         const lvl = levels[currentLevelIndex];
 
         GRID_COLS = lvl.gridCols;
