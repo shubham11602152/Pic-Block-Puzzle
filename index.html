@@ -499,7 +499,7 @@
       let solvedOffsetX = 0; // translation offset on win
       let solvedOffsetY = 0; // translation offset on win
       let showHint = false;
-      let soundEnabled = false;
+      let soundEnabled = true;
 
       // Custom level upload state
       let uploadedImgDataUrl = null;
@@ -745,8 +745,7 @@
         }, 5000);
       }
 
-      function toggleSound() {
-        soundEnabled = !soundEnabled;
+      function updateSoundUI() {
         const soundOnIcon = document.getElementById("soundOnIcon");
         const soundOffIcon = document.getElementById("soundOffIcon");
         const soundBtn = document.getElementById("soundBtn");
@@ -755,13 +754,21 @@
           soundOnIcon.classList.remove("hidden");
           soundOffIcon.classList.add("hidden");
           soundBtn.classList.add("bg-[#d8f3dc]", "border-[#74c69d]");
-          toggleAmbientMusic();
         } else {
           soundOnIcon.classList.add("hidden");
           soundOffIcon.classList.remove("hidden");
           soundBtn.classList.remove("bg-[#d8f3dc]", "border-[#74c69d]");
-          toggleAmbientMusic();
         }
+      }
+
+      function setSoundEnabled(enabled) {
+        soundEnabled = enabled;
+        updateSoundUI();
+        toggleAmbientMusic();
+      }
+
+      function toggleSound() {
+        setSoundEnabled(!soundEnabled);
       }
 
       // Helper to draw a rounded rect
@@ -1839,6 +1846,12 @@
         return { x, y };
       }
 
+      function triggerHapticFeedback(duration = 12) {
+        if (navigator.vibrate) {
+          navigator.vibrate(duration);
+        }
+      }
+
       function onStart(e) {
         if (isSolved) return;
         const { x, y } = getPreciseCoordsFromEvent(e);
@@ -1867,6 +1880,7 @@
           activePiece.dragTargetY = clickedPiece.y;
 
           playSlideSound();
+          triggerHapticFeedback(10);
           e.preventDefault();
         }
       }
@@ -1899,17 +1913,20 @@
             moveCount++;
             document.getElementById("moveCounter").innerText = moveCount;
             playSnapSound();
+            triggerHapticFeedback(16);
             checkPuzzleWinCondition();
           } else {
             // Dropped back in its starting location
             activePiece.x = dragStartGridX;
             activePiece.y = dragStartGridY;
+            triggerHapticFeedback(8);
           }
         } else {
           // Invalid location! Elastic snap back to start (and trigger return animation)
           activePiece.x = dragStartGridX;
           activePiece.y = dragStartGridY;
           playSlideSound(); // Gentle sound alerting slide-back
+          triggerHapticFeedback(16);
         }
 
         isDragging = false;
@@ -2084,7 +2101,7 @@
               ? "bg-[#a8dadc] text-[#1d3557] border-[#457b9d] shadow-sm"
               : "bg-[#faf6ee] text-[#5e5445] hover:bg-white border-[#d3c9b5] btn-shadow"
           }`;
-          btn.innerText = lvl.isCustom ? `📸 ${lvl.name}` : `${idx + 1}`;
+          btn.innerText = `${idx + 1}`;
           btn.onclick = () => loadLevel(idx);
           container.appendChild(btn);
         });
@@ -2267,6 +2284,8 @@
       );
 
       window.onload = () => {
+        setSoundEnabled(true);
+
         // Boot first level configuration
         loadLevel(0);
 
