@@ -1228,18 +1228,30 @@
           }
         }
 
+        function getLevelPieceSizeLimit() {
+          if (level.gridCols <= 6) return 3;
+          if (level.gridCols <= 8) return 4;
+          return 5;
+        }
+
         let generatedPieces = [];
         let pieceId = 1;
 
-        // Flood-fill cells to cluster them into cozy polyomino groups of sizes 2 to 4
+        // Gather all untouched cells to seed new polyomino pieces in random order
         while (artworkCells.some((cell) => !cell.visited)) {
-          let startCell = artworkCells.find((cell) => !cell.visited);
-          let maxPieceSize = Math.floor(Math.random() * 3) + 2; // Size 2, 3 or 4
+          let remaining = artworkCells.filter((cell) => !cell.visited);
+          let startCell =
+            remaining[Math.floor(Math.random() * remaining.length)];
+          let pieceSizeLimit = getLevelPieceSizeLimit();
+          let targetSize = Math.min(
+            remaining.length,
+            2 + Math.floor(Math.random() * (pieceSizeLimit - 1)),
+          );
           let clusteredCells = [startCell];
           startCell.visited = true;
 
-          for (let i = 1; i < maxPieceSize; i++) {
-            let candidates = [];
+          for (let i = 1; i < targetSize; i++) {
+            let neighbors = [];
             clusteredCells.forEach((pc) => {
               const directions = [
                 [1, 0],
@@ -1253,23 +1265,21 @@
                 let targetCell = artworkCells.find(
                   (cell) => cell.col === tc && cell.row === tr && !cell.visited,
                 );
-                if (targetCell && !candidates.includes(targetCell)) {
-                  candidates.push(targetCell);
+                if (targetCell && !neighbors.includes(targetCell)) {
+                  neighbors.push(targetCell);
                 }
               });
             });
 
-            if (candidates.length === 0) break;
+            if (neighbors.length === 0) break;
             let nextCell =
-              candidates[Math.floor(Math.random() * candidates.length)];
+              neighbors[Math.floor(Math.random() * neighbors.length)];
             nextCell.visited = true;
             clusteredCells.push(nextCell);
           }
 
-          // Gather minimum col and row to create coordinate anchor
           let minCol = Math.min(...clusteredCells.map((c) => c.col));
           let minRow = Math.min(...clusteredCells.map((c) => c.row));
-
           let relativeShape = clusteredCells.map((c) => [
             c.col - minCol,
             c.row - minRow,
@@ -1279,9 +1289,9 @@
             id: pieceId++,
             targetX: minCol,
             targetY: minRow,
-            x: minCol, // anchor current grid coordinates
+            x: minCol,
             y: minRow,
-            currentX: minCol, // LERP visually animated coordinate (float px-based)
+            currentX: minCol,
             currentY: minRow,
             cells: relativeShape,
             dragTargetX: minCol,
@@ -1292,35 +1302,128 @@
         return generatedPieces;
       }
 
-      // Scrambles the generated puzzle by performing actual sliding maneuvers to guarantee solvability
-      function scramblePuzzle() {
-        let stepsCount = 100 + currentLevelIndex * 20; // harder levels scramble more
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
 
-        for (let s = 0; s < stepsCount; s++) {
-          // Select a random piece
-          let randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
-          // Select a random cardinal direction
+      function canPiecePlaceAt(piece, col, row, occupied) {
+        for (let i = 0; i < piece.cells.length; i++) {
+          let cell = piece.cells[i];
+          let gc = col + cell[0];
+          let gr = row + cell[1];
+
+          if (gc < 0 || gc >= GRID_COLS || gr < 0 || gr >= GRID_ROWS) {
+            return false;
+          }
+          if (occupied[gr][gc]) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      function getValidPiecePositions(piece, occupied, minDistance) {
+        let positions = [];
+
+        for (let r = 0; r < GRID_ROWS; r++) {
+          for (let c = 0; c < GRID_COLS; c++) {
+            if (canPiecePlaceAt(piece, c, r, occupied)) {
+              positions.push({ col: c, row: r });
+            }
+          }
+        }
+
+        if (minDistance > 0) {
+          let filtered = positions.filter(
+            (pos) =>
+              Math.abs(pos.col - piece.targetX) +
+                Math.abs(pos.row - piece.targetY) >=
+              minDistance,
+          );
+          if (filtered.length > 0) {
+            return filtered;
+          }
+        }
+
+        return positions;
+      }
+
+      function markPieceOnGrid(piece, col, row, occupied) {
+        piece.cells.forEach((cell) => {
+          occupied[row + cell[1]][col + cell[0]] = true;
+        });
+      }
+
+      function scramblePuzzle() {
+        let bestLayout = null;
+        let desiredDistance = Math.max(
+          2,
+          Math.min(4, Math.floor(Math.min(GRID_COLS, GRID_ROWS) / 3)),
+        );
+
+        for (let attempt = 0; attempt < 12; attempt++) {
+          let occupied = Array.from({ length: GRID_ROWS }, () =>
+            Array(GRID_COLS).fill(false),
+          );
+          let assignment = [];
+          let shuffledPieces = shuffleArray([...pieces]);
+          let failed = false;
+
+          for (let piece of shuffledPieces) {
+            let positions = getValidPiecePositions(
+              piece,
+              occupied,
+              desiredDistance,
+            );
+            if (positions.length === 0) {
+              failed = true;
+              break;
+            }
+            let chosen =
+              positions[Math.floor(Math.random() * positions.length)];
+            markPieceOnGrid(piece, chosen.col, chosen.row, occupied);
+            assignment.push({ piece, col: chosen.col, row: chosen.row });
+          }
+
+          if (!failed) {
+            bestLayout = assignment;
+            break;
+          }
+        }
+
+        if (bestLayout) {
+          bestLayout.forEach(({ piece, col, row }) => {
+            piece.x = col;
+            piece.y = row;
+          });
+        } else {
+          let stepsCount = 120 + currentLevelIndex * 20;
           let dirs = [
             [1, 0],
             [-1, 0],
             [0, 1],
             [0, -1],
           ];
-          let randomDir = dirs[Math.floor(Math.random() * dirs.length)];
-
-          if (
-            canPieceMoveTo(
-              randomPiece,
-              randomPiece.x + randomDir[0],
-              randomPiece.y + randomDir[1],
-            )
-          ) {
-            randomPiece.x += randomDir[0];
-            randomPiece.y += randomDir[1];
+          for (let s = 0; s < stepsCount; s++) {
+            let randomPiece = pieces[Math.floor(Math.random() * pieces.length)];
+            let randomDir = dirs[Math.floor(Math.random() * dirs.length)];
+            if (
+              canPieceMoveTo(
+                randomPiece,
+                randomPiece.x + randomDir[0],
+                randomPiece.y + randomDir[1],
+              )
+            ) {
+              randomPiece.x += randomDir[0];
+              randomPiece.y += randomDir[1];
+            }
           }
         }
 
-        // Align current smooth LERP parameters instantly to scramble location
         pieces.forEach((p) => {
           p.currentX = p.x;
           p.currentY = p.y;
