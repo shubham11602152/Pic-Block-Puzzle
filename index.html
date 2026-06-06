@@ -89,6 +89,26 @@
             ></path>
           </svg>
         </button>
+        <!-- Masterpiece Side Menu Toggle -->
+        <button
+          onclick="toggleSideMenu(true)"
+          class="p-3 bg-[#faf6ee] text-[#5e5445] rounded-full btn-shadow transition-all duration-100 hover:bg-white border border-[#d3c9b5]"
+          title="Open Masterpiece Menu"
+        >
+          <svg
+            class="w-5 h-5"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M4 6h16M4 12h16M4 18h10"
+            />
+          </svg>
+        </button>
         <!-- Help/How-to Button -->
         <button
           onclick="toggleHowTo(true)"
@@ -111,6 +131,51 @@
         </button>
       </div>
     </header>
+
+    <!-- Side Menu Overlay + Masterpiece Selector -->
+    <div
+      id="sideMenuOverlay"
+      onclick="toggleSideMenu(false)"
+      class="fixed inset-0 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-40"
+    ></div>
+    <aside
+      id="sideMenu"
+      class="fixed right-0 top-0 h-full w-[320px] max-w-full translate-x-full transform overflow-y-auto bg-[#faf6ee] border-l border-[#d3c9b5] shadow-2xl transition-transform duration-300 z-50"
+    >
+      <div
+        class="p-5 flex items-start justify-between border-b border-[#d3c9b5]"
+      >
+        <div>
+          <h2 class="text-xl font-bold text-[#5e5445]">Select Masterpiece</h2>
+          <p class="text-xs text-[#8c7e6c] uppercase tracking-wider">
+            Choose a level from the side menu
+          </p>
+        </div>
+        <button
+          onclick="toggleSideMenu(false)"
+          class="p-3 rounded-full text-[#5e5445] bg-[#eae3d2] hover:bg-[#d8d0ba] transition"
+        >
+          <span class="text-lg font-bold">×</span>
+        </button>
+      </div>
+      <div class="p-4 flex flex-col gap-4">
+        <button
+          onclick="
+            openCustomCreator();
+            toggleSideMenu(false);
+          "
+          class="text-sm bg-[#a8f5d0] hover:bg-[#cbfedc] text-[#1e543b] px-4 py-2 rounded-full font-bold transition-all border border-[#75d6a8] shadow-sm"
+        >
+          ＋ Custom Art
+        </button>
+        <div
+          class="grid grid-cols-5 gap-2 max-h-[calc(100vh-220px)] overflow-y-auto pr-1 pb-2"
+          id="levelChips"
+        >
+          <!-- Programmatically filled -->
+        </div>
+      </div>
+    </aside>
 
     <!-- Main Workspace -->
     <main
@@ -241,30 +306,6 @@
             >
               0%
             </p>
-          </div>
-        </div>
-
-        <!-- Masterpiece Selector Grid Chips (Direct Access) -->
-        <div
-          class="bg-[#faf6ee]/70 p-4 rounded-2xl border border-[#d3c9b5] flex flex-col gap-2.5"
-        >
-          <div class="flex justify-between items-center">
-            <span
-              class="text-xs text-[#8c7e6c] font-bold uppercase tracking-wider"
-              >Select Masterpiece</span
-            >
-            <button
-              onclick="openCustomCreator()"
-              class="text-xs bg-[#a8f5d0] hover:bg-[#cbfedc] text-[#1e543b] px-3 py-1 rounded-full font-bold transition-all border border-[#75d6a8] shadow-sm"
-            >
-              ＋ Custom Art
-            </button>
-          </div>
-          <div
-            class="flex flex-wrap gap-1.5 max-h-[140px] overflow-y-auto pr-1 pb-2"
-            id="levelChips"
-          >
-            <!-- Programmatically filled -->
           </div>
         </div>
       </div>
@@ -2139,7 +2180,7 @@
 
         levels.forEach((lvl, idx) => {
           const btn = document.createElement("button");
-          btn.className = `px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl transition-all border ${
+          btn.className = `w-full aspect-square px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl transition-all border ${
             idx === currentLevelIndex
               ? "bg-[#a8dadc] text-[#1d3557] border-[#457b9d] shadow-sm"
               : "bg-[#faf6ee] text-[#5e5445] hover:bg-white border-[#d3c9b5] btn-shadow"
@@ -2281,6 +2322,26 @@
         console.log({ levels });
         closeCustomCreator();
         loadLevel(levels.length - 1);
+      }
+
+      function toggleSideMenu(show) {
+        const panel = document.getElementById("sideMenu");
+        const overlay = document.getElementById("sideMenuOverlay");
+
+        if (show === undefined) {
+          show = panel.classList.contains("translate-x-full");
+        }
+
+        if (show) {
+          panel.classList.remove("translate-x-full");
+          overlay.classList.remove("opacity-0", "pointer-events-none");
+          overlay.classList.add("opacity-100");
+        } else {
+          panel.classList.add("translate-x-full");
+          overlay.classList.add("opacity-0");
+          overlay.classList.remove("opacity-100");
+          setTimeout(() => overlay.classList.add("pointer-events-none"), 300);
+        }
       }
 
       // How-To overlay controllers
