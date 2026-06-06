@@ -169,7 +169,7 @@
           ＋ Custom Art
         </button>
         <div
-          class="grid grid-cols-5 gap-2 max-h-[calc(100vh-220px)] overflow-y-auto pr-1 pb-2"
+          class="grid grid-cols-5 gap-2 max-h-[calc(100vh-220px)] overflow-y-auto pr-1 pb-2 pt-1"
           id="levelChips"
         >
           <!-- Programmatically filled -->
@@ -514,6 +514,55 @@
 
       // Game state variables
       let currentLevelIndex = 0;
+      let completedLevels = new Set(); // Tracks which levels have been cleared
+
+      function saveGameProgress() {
+        localStorage.setItem(
+          "picBlocksProgress",
+          JSON.stringify(Array.from(completedLevels)),
+        );
+      }
+
+      function loadGameProgress() {
+        try {
+          const saved = localStorage.getItem("picBlocksProgress");
+          if (saved) {
+            completedLevels = new Set(JSON.parse(saved).map(Number));
+          }
+        } catch (e) {
+          console.error("Failed to load progress:", e);
+          completedLevels = new Set();
+        }
+      }
+
+      function saveSoundSettings() {
+        localStorage.setItem(
+          "picBlocksAudioEnabled",
+          JSON.stringify(soundEnabled),
+        );
+      }
+
+      function loadSoundSettings() {
+        try {
+          const saved = localStorage.getItem("picBlocksAudioEnabled");
+          if (saved !== null) {
+            soundEnabled = JSON.parse(saved);
+          }
+        } catch (e) {
+          console.error("Failed to load sound settings:", e);
+          soundEnabled = true;
+        }
+      }
+
+      function isLevelAccessible(index) {
+        // Level 0 is always accessible
+        // Other levels are accessible if the previous level is completed
+        return index === 0 || completedLevels.has(index - 1);
+      }
+
+      function isLevelCompleted(index) {
+        return completedLevels.has(index);
+      }
       let GRID_COLS = 6;
       let GRID_ROWS = 6;
       let CELL_SIZE = 100;
@@ -845,6 +894,7 @@
         soundEnabled = enabled;
         updateSoundUI();
         toggleAmbientMusic();
+        saveSoundSettings();
       }
 
       function toggleSound() {
@@ -2055,6 +2105,10 @@
         if (maxClusterSize === pieces.length) {
           const [finalDx, finalDy] = bestOffsetKey.split(",").map(Number);
 
+          // Mark level as completed and unlock next level
+          completedLevels.add(currentLevelIndex);
+          saveGameProgress();
+
           isSolved = true;
           isCompletingAnimation = true;
           completionProgress = 0;
@@ -2108,6 +2162,14 @@
       }
 
       function loadLevel(index) {
+        // Check if level is accessible
+        if (!isLevelAccessible(index)) {
+          console.warn(
+            `Level ${index} is locked. Unlock level ${index - 1} first.`,
+          );
+          return;
+        }
+
         currentLevelIndex = index;
         activeAmbientProgression = pickAmbientProgressionForLevel(index);
         const lvl = levels[currentLevelIndex];
@@ -2176,14 +2238,52 @@
         container.innerHTML = "";
 
         levels.forEach((lvl, idx) => {
+          const isAccessible = isLevelAccessible(idx);
+          const isCompleted = isLevelCompleted(idx);
+          const isCurrent = idx === currentLevelIndex;
+
           const btn = document.createElement("button");
-          btn.className = `w-full aspect-square px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl transition-all border ${
-            idx === currentLevelIndex
-              ? "bg-[#a8dadc] text-[#1d3557] border-[#457b9d] shadow-sm"
-              : "bg-[#faf6ee] text-[#5e5445] hover:bg-white border-[#d3c9b5] btn-shadow"
-          }`;
+          let className = `w-full aspect-square px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl transition-all border flex items-center justify-center relative `;
+
+          if (!isAccessible) {
+            className +=
+              "bg-[#e0d4c8] text-[#9d8b7d] border-[#d0c4b8] cursor-not-allowed";
+          } else if (isCurrent) {
+            className +=
+              "bg-[#a8dadc] text-[#1d3557] border-[#457b9d] shadow-sm";
+          } else if (isCompleted) {
+            className +=
+              "bg-[#cbfedc] text-[#1e543b] hover:bg-[#b0f7c5] border-[#75d6a8] shadow-sm";
+          } else {
+            className +=
+              "bg-[#faf6ee] text-[#5e5445] hover:bg-white border-[#d3c9b5] btn-shadow";
+          }
+
+          btn.className = className;
           btn.innerText = `${idx + 1}`;
-          btn.onclick = () => loadLevel(idx);
+
+          if (isAccessible) {
+            btn.onclick = () => loadLevel(idx);
+          } else {
+            btn.disabled = true;
+          }
+
+          // Add a lock icon for locked levels (top-right corner)
+          if (!isAccessible) {
+            const lockSpan = document.createElement("span");
+            lockSpan.className =
+              "absolute top-0 right-0 text-sm leading-none -mr-1 -mt-1 bg-[#d0c4b8] rounded-full w-5 h-5 flex items-center justify-center";
+            lockSpan.innerText = "🔒";
+            btn.appendChild(lockSpan);
+          } else if (isCompleted && !isCurrent) {
+            // Add a check icon for completed levels (top-right corner)
+            const checkSpan = document.createElement("span");
+            checkSpan.className =
+              "absolute top-0 right-0 text-sm leading-none -mr-1 -mt-1 bg-[#75d6a8] rounded-full w-5 h-5 flex items-center justify-center text-[#1e543b]";
+            checkSpan.innerText = "✓";
+            btn.appendChild(checkSpan);
+          }
+
           container.appendChild(btn);
         });
       }
@@ -2385,7 +2485,9 @@
       );
 
       window.onload = () => {
-        setSoundEnabled(true);
+        loadSoundSettings();
+        loadGameProgress();
+        setSoundEnabled(soundEnabled);
 
         // Boot first level configuration
         loadLevel(0);
