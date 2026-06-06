@@ -514,6 +514,7 @@
 
       // Game state variables
       let currentLevelIndex = 0;
+      let currentLevelIsCustom = false; // Track if current level is custom
       let completedLevels = new Set(); // Tracks which levels have been cleared
 
       function saveGameProgress() {
@@ -801,6 +802,9 @@
           "expert",
         ),
       ];
+
+      // Uploaded levels - user-created levels, not subject to lock/unlock progression
+      let customLevels = [];
 
       let ambientSynth, slideSynth, chimeSynth;
 
@@ -2105,9 +2109,11 @@
         if (maxClusterSize === pieces.length) {
           const [finalDx, finalDy] = bestOffsetKey.split(",").map(Number);
 
-          // Mark level as completed and unlock next level
-          completedLevels.add(currentLevelIndex);
-          saveGameProgress();
+          // Mark level as completed only for main levels (not custom)
+          if (!currentLevelIsCustom) {
+            completedLevels.add(currentLevelIndex);
+            saveGameProgress();
+          }
 
           isSolved = true;
           isCompletingAnimation = true;
@@ -2161,9 +2167,9 @@
         if (soundEnabled) playSnapSound();
       }
 
-      function loadLevel(index) {
-        // Check if level is accessible
-        if (!isLevelAccessible(index)) {
+      function loadLevel(index, isCustom = false) {
+        // Check if level is accessible (custom levels are always accessible)
+        if (!isCustom && !isLevelAccessible(index)) {
           console.warn(
             `Level ${index} is locked. Unlock level ${index - 1} first.`,
           );
@@ -2171,8 +2177,9 @@
         }
 
         currentLevelIndex = index;
+        currentLevelIsCustom = isCustom;
         activeAmbientProgression = pickAmbientProgressionForLevel(index);
-        const lvl = levels[currentLevelIndex];
+        const lvl = isCustom ? customLevels[index] : levels[index];
 
         GRID_COLS = lvl.gridCols;
         GRID_ROWS = lvl.gridRows;
@@ -2229,18 +2236,31 @@
       }
 
       function nextLevel() {
-        let nextIndex = (currentLevelIndex + 1) % levels.length;
-        loadLevel(nextIndex);
+        if (currentLevelIsCustom) {
+          let nextIndex = (currentLevelIndex + 1) % customLevels.length;
+          loadLevel(nextIndex, true);
+        } else {
+          let nextIndex = (currentLevelIndex + 1) % levels.length;
+          loadLevel(nextIndex, false);
+        }
       }
 
       function renderLevelChips() {
         const container = document.getElementById("levelChips");
         container.innerHTML = "";
 
+        // Render main levels
+        const mainLevelsHeader = document.createElement("div");
+        mainLevelsHeader.className =
+          "w-full mb-2 px-2 text-sm font-semibold text-[#5e5445]";
+        mainLevelsHeader.innerText = "Story Levels";
+        mainLevelsHeader.style.gridColumn = "1 / -1";
+        container.appendChild(mainLevelsHeader);
+
         levels.forEach((lvl, idx) => {
           const isAccessible = isLevelAccessible(idx);
           const isCompleted = isLevelCompleted(idx);
-          const isCurrent = idx === currentLevelIndex;
+          const isCurrent = idx === currentLevelIndex && !currentLevelIsCustom;
 
           const btn = document.createElement("button");
           let className = `w-full aspect-square px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl transition-all border flex items-center justify-center relative `;
@@ -2263,7 +2283,7 @@
           btn.innerText = `${idx + 1}`;
 
           if (isAccessible) {
-            btn.onclick = () => loadLevel(idx);
+            btn.onclick = () => loadLevel(idx, false);
           } else {
             btn.disabled = true;
           }
@@ -2286,6 +2306,37 @@
 
           container.appendChild(btn);
         });
+
+        // Render uploaded levels header and chips
+        if (customLevels.length > 0) {
+          const customLevelsHeader = document.createElement("div");
+          customLevelsHeader.className =
+            "w-full mb-2 mt-4 px-2 text-sm font-semibold text-[#5e5445]";
+          customLevelsHeader.innerText = "Uploaded Levels";
+          customLevelsHeader.style.gridColumn = "1 / -1";
+          container.appendChild(customLevelsHeader);
+
+          customLevels.forEach((lvl, idx) => {
+            const isCurrent = idx === currentLevelIndex && currentLevelIsCustom;
+
+            const btn = document.createElement("button");
+            let className = `w-full aspect-square px-3.5 py-2 text-xs md:text-sm font-bold rounded-xl transition-all border flex items-center justify-center relative `;
+
+            if (isCurrent) {
+              className +=
+                "bg-[#a8dadc] text-[#1d3557] border-[#457b9d] shadow-sm";
+            } else {
+              className +=
+                "bg-[#faf6ee] text-[#5e5445] hover:bg-white border-[#d3c9b5] btn-shadow";
+            }
+
+            btn.className = className;
+            btn.innerText = `${idx + 1}`;
+            btn.onclick = () => loadLevel(idx, true);
+
+            container.appendChild(btn);
+          });
+        }
       }
 
       // Custom Creator Controllers & Image processing
@@ -2414,11 +2465,11 @@
           customImageDataUrl: uploadedImgDataUrl,
         };
 
-        // Push to levels list and set as current active level
-        levels.push(newCustomLevel);
-        console.log({ levels });
+        // Push to custom levels list and set as current active level
+        customLevels.push(newCustomLevel);
+        console.log({ customLevels });
         closeCustomCreator();
-        loadLevel(levels.length - 1);
+        loadLevel(customLevels.length - 1, true);
       }
 
       function toggleSideMenu(show) {
