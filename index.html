@@ -209,23 +209,21 @@
             </div>
           </div>
 
-          <div class="bg-[#eae3d2]/80 p-3 rounded-2xl border border-[#d3c9b5]">
-            <div class="grid grid-cols-2 gap-2">
-              <button
-                id="hintBtn"
-                class="w-full py-2 bg-[#faf6ee] text-[#5e5445] font-bold text-sm rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5] flex items-center justify-center gap-1.5"
-                title="Hold to Preview Solve"
-              >
-                <span>👁️</span> Peek
-              </button>
-              <button
-                onclick="restartLevel()"
-                class="w-full py-2 bg-[#faf6ee] text-[#5e5445] font-bold text-sm rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5] flex items-center justify-center gap-1.5"
-                title="Rescramble Puzzle"
-              >
-                <span>🔄</span> Scramble
-              </button>
-            </div>
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              id="hintBtn"
+              class="w-full py-2 bg-[#faf6ee] text-[#5e5445] font-bold text-sm rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5] flex items-center justify-center gap-1.5"
+              title="Hold to Preview Solve"
+            >
+              <span>👁️</span> Peek
+            </button>
+            <button
+              onclick="restartLevel()"
+              class="w-full py-2 bg-[#faf6ee] text-[#5e5445] font-bold text-sm rounded-xl hover:bg-white transition-all btn-shadow border border-[#d3c9b5] flex items-center justify-center gap-1.5"
+              title="Rescramble Puzzle"
+            >
+              <span>🔄</span> Scramble
+            </button>
           </div>
         </div>
       </div>
@@ -515,6 +513,12 @@
       // Game state variables
       let currentLevelIndex = 0;
       let currentLevelIsCustom = false; // Track if current level is custom
+      // Drop animation state for level load
+      let piecesDropping = false;
+      let dropStagger = 60; // ms between piece drop starts
+      let dropDuration = 450; // ms duration of single piece drop
+      let dropScheduledRestart = false; // when true, call restartLevel() after drop
+
       let completedLevels = new Set(); // Tracks which levels have been cleared
 
       function saveGameProgress() {
@@ -1815,7 +1819,7 @@
           } else if (isCurrentPieceActive) {
             // Bright white outer highlight with gentle visual glow when grabbed
             ctx.strokeStyle = "#ffffff";
-            ctx.lineWidth = 6;
+            ctx.lineWidth = 4;
             ctx.shadowColor = "rgba(255, 255, 255, 0.8)";
             ctx.shadowBlur = 10;
             ctx.stroke();
@@ -1826,18 +1830,18 @@
             ctx.stroke();
 
             // Delicate 3D highlight on top-left outer borders
-            ctx.save();
-            ctx.strokeStyle = "#5e5445";
-            ctx.lineWidth = 2;
-            ctx.translate(-1.5, -1.5);
-            ctx.stroke();
-            ctx.restore();
+            // ctx.save();
+            // ctx.strokeStyle = "#000000";
+            // ctx.lineWidth = 2;
+            // ctx.translate(-1.5, -1.5);
+            // ctx.stroke();
+            // ctx.restore();
           }
           ctx.restore();
         });
 
         // 4. Overlap complete, pristine seamless active image (ONLY inside the active level image boundaries, matching position/width/height perfectly)
-        if (isSolved && completionProgress > 0) {
+        if (!piecesDropping && isSolved && completionProgress > 0) {
           ctx.save();
           ctx.globalAlpha = completionProgress;
 
@@ -1916,35 +1920,75 @@
       }
 
       function animate() {
-        // Apply LERP physics to smoothly glide tile anchors
-        let moving = false;
-        pieces.forEach((p) => {
-          if (isDragging && activePiece && p.id === activePiece.id) {
-            // Smoothly slide piece under the cursor/finger coordinates
-            const dx = p.dragTargetX - p.currentX;
-            const dy = p.dragTargetY - p.currentY;
-            p.currentX += dx * 0.4;
-            p.currentY += dy * 0.4;
-            moving = true;
-          } else {
-            const dx = p.x - p.currentX;
-            const dy = p.y - p.currentY;
-
-            if (Math.abs(dx) > 0.005) {
-              p.currentX += dx * 0.24;
-              moving = true;
-            } else {
-              p.currentX = p.x;
+        const now = performance.now();
+        // Handle drop-in animation for pieces on level load
+        if (piecesDropping) {
+          let allDone = true;
+          for (let i = 0; i < pieces.length; i++) {
+            const p = pieces[i];
+            const start = p.dropStartTime || 0;
+            if (now < start) {
+              allDone = false;
+              continue; // not started yet
             }
-
-            if (Math.abs(dy) > 0.005) {
-              p.currentY += dy * 0.24;
-              moving = true;
-            } else {
-              p.currentY = p.y;
+            const elapsed = now - start;
+            const t = Math.min(1, elapsed / dropDuration);
+            // easeOutCubic
+            const et = 1 - Math.pow(1 - t, 3);
+            p.currentY = p.dropStartY + et * (p.y - p.dropStartY);
+            // ensure X snaps to target during drop
+            p.currentX = p.x;
+            if (t < 1) allDone = false;
+          }
+          if (allDone) {
+            piecesDropping = false;
+            if (dropScheduledRestart) {
+              dropScheduledRestart = false;
+              moveCount = 0;
+              document.getElementById("moveCounter").innerText = "0";
+              document.getElementById("progressPercentage").innerText = "0%";
+              isSolved = false;
+              isCompletingAnimation = false;
+              completionProgress = 0;
+              solvedOffsetX = 0;
+              solvedOffsetY = 0;
+              const winBanner = document.getElementById("winBanner");
+              winBanner.classList.add("opacity-0", "pointer-events-none");
+              startTimer();
             }
           }
-        });
+        }
+        // Apply LERP physics to smoothly glide tile anchors only after initial drop animation finishes
+        let moving = false;
+        if (!piecesDropping) {
+          pieces.forEach((p) => {
+            if (isDragging && activePiece && p.id === activePiece.id) {
+              // Smoothly slide piece under the cursor/finger coordinates
+              const dx = p.dragTargetX - p.currentX;
+              const dy = p.dragTargetY - p.currentY;
+              p.currentX += dx * 0.4;
+              p.currentY += dy * 0.4;
+              moving = true;
+            } else {
+              const dx = p.x - p.currentX;
+              const dy = p.y - p.currentY;
+
+              if (Math.abs(dx) > 0.005) {
+                p.currentX += dx * 0.24;
+                moving = true;
+              } else {
+                p.currentX = p.x;
+              }
+
+              if (Math.abs(dy) > 0.005) {
+                p.currentY += dy * 0.24;
+                moving = true;
+              } else {
+                p.currentY = p.y;
+              }
+            }
+          });
+        }
 
         // Smooth completion animation that merges tiles into a single seamless frame
         if (isSolved && isCompletingAnimation) {
@@ -1988,6 +2032,7 @@
 
       function onStart(e) {
         if (isSolved) return;
+        if (piecesDropping) return; // disable interactions while tiles are dropping into place
         const { x, y } = getPreciseCoordsFromEvent(e);
 
         // Adjusted matching for GRID_PADDING boundaries
@@ -2222,26 +2267,72 @@
       }
 
       function initiateLevelLaunch(lvl) {
+        // Reset solved state before the new level begins dropping in
+        isSolved = false;
+        isCompletingAnimation = false;
+        completionProgress = 0;
+        solvedOffsetX = 0;
+        solvedOffsetY = 0;
+        showHint = false;
+
+        const winBanner = document.getElementById("winBanner");
+        const winCard = document.getElementById("winCard");
+        winBanner.classList.add("opacity-0", "pointer-events-none");
+        winCard.classList.remove("scale-100");
+        winCard.classList.add("scale-95");
+
         // Populate metadata UI
         document.getElementById("levelSubtitle").innerText = lvl.subtitle;
         document.getElementById("levelName").innerText = lvl.name;
 
-        // Generate customized puzzle tiling polyominoes
+        // Generate customized puzzle tiling polyominoes and scramble them before drop animation
         pieces = generatePuzzlePieces(lvl);
+        scramblePuzzle();
+
+        // Prepare drop animation: initialize pieces above canvas with staggered start times.
+        // Ensure each piece begins fully outside the visible game board.
+        const now = performance.now();
+        for (let i = 0; i < pieces.length; i++) {
+          const p = pieces[i];
+          const pieceHeight = Math.max(...p.cells.map((c) => c[1])) + 1;
+          p.dropStartY = -(
+            pieceHeight +
+            2 +
+            Math.floor(Math.random() * Math.max(3, GRID_ROWS))
+          );
+          p.currentX = p.x;
+          p.currentY = p.dropStartY;
+          p.dragTargetX = p.x;
+          p.dragTargetY = p.dropStartY;
+          const rowDelay = (GRID_ROWS - 1 - p.y) * dropStagger;
+          p.dropStartTime = now + rowDelay + (p.x % 2) * 20;
+        }
+        piecesDropping = true;
+        dropScheduledRestart = true;
 
         // Refresh chip layout highlighting
         renderLevelChips();
+      }
 
-        restartLevel();
+      function closeWinBanner(callback) {
+        const winBanner = document.getElementById("winBanner");
+        const winCard = document.getElementById("winCard");
+        winBanner.classList.add("opacity-0", "pointer-events-none");
+        winCard.classList.remove("scale-100");
+        winCard.classList.add("scale-95");
+
+        if (typeof callback === "function") {
+          setTimeout(callback, 720);
+        }
       }
 
       function nextLevel() {
         if (currentLevelIsCustom) {
           let nextIndex = (currentLevelIndex + 1) % customLevels.length;
-          loadLevel(nextIndex, true);
+          closeWinBanner(() => loadLevel(nextIndex, true));
         } else {
           let nextIndex = (currentLevelIndex + 1) % levels.length;
-          loadLevel(nextIndex, false);
+          closeWinBanner(() => loadLevel(nextIndex, false));
         }
       }
 
